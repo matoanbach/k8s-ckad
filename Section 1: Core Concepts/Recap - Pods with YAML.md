@@ -38,12 +38,25 @@ Node
 └── Kubernetes Components (e.g., kubelet, kube-proxy)
 ```
 
+- Create a new image
+
+```
+kubectl run nginx --image=nginx # create an image without the yaml file
+kubectl run redis --image=redis123 --dry-run -o yaml # create a yaml file for a port
+```
+
 ```
 kubectl get pods
+kubectl get pods -o wide # display: created on a node
 ```
 
 ```
 kubectl describe pod myapp-pod
+```
+
+```
+kubectl delete -f myapp-pod.yaml
+kubectl delete pod webapp
 ```
 
 ```
@@ -187,3 +200,20 @@ Minikube
             ├── kubelet
             └── kube-proxy
 ```
+
+## Edit POD - A note on Editing Existing Pods
+
+If you are asked to edit an existing POD, please note the following:
+
+- If you are given a pod definition file, edit that file and use it to create a new pod
+- If you are not given a pod definition file, you may extract the definition to a file using the below command:
+  ```
+  kubectl get pod <pod-name> -o yaml > pod-definition.yaml
+  ```
+  - Then edit the file to make the necessary changes, delete, and recreate the pod
+- To modify the properties of the pod, you can utilize the <code>kubectl edit pod [pod name]</code> command. Please note that only the properties listed below are editable.
+  - spec.containers[*].image
+  - spec.initContainers[*].image
+  - spec.activeDeadlineSeconds
+  - spec.tolerations
+  - spec.terminationGracePeriodSeconds
