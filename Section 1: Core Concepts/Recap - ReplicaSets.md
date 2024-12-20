@@ -81,6 +81,7 @@ kubectl create -f replicaset-definition.yml
 
 ```
 kubectl get replicaset
+kubectl get rc
 ```
 
 ## Scale
