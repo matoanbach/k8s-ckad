@@ -69,5 +69,5 @@ crictl logs asldkh129uij
 crictl pods
 ```
 
-<img src="https://raw.githubusercontent.com/matoanbach/k8s-ckad/assets/docker-vs-crictl.png"/>
-<img src="https://raw.githubusercontent.com/matoanbach/k8s-ckad/assets/docker-vs-crictl2.png"/>
+<img src="https://github.com/matoanbach/k8s-ckad/blob/main/assets/sec%201/docker-vs-crictl.png"/>
+<img src="https://github.com/matoanbach/k8s-ckad/blob/main/assets/sec%201/docker-vs-crictl2.png"/>
