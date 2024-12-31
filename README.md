@@ -11,10 +11,22 @@ kubectl expose deployment my-webapp --name front-end-service --type NodePort --p
 ```
 
 - now, add the nodePort field under the ports section as follows:-
+
 ```bash
 ports:
  - port: 80
    protocol: TCP
    targetPort: 80
    nodePort: 30083
+```
+
+- Deploy a `messaging` pod using the `redis:alpine` image with the labels set to `tier=msg`
+
+```bash
+kubectl run messaging --image=redis:alpine -l tier=msg
+```
+
+- Delete many pods at once
+```bash
+kubectl delete pod -l name=busybox-pod
 ```
