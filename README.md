@@ -30,3 +30,8 @@ kubectl run messaging --image=redis:alpine -l tier=msg
 ```bash
 kubectl delete pod -l name=busybox-pod
 ```
+
+- How to check the connection using a temporary Pod:
+```bash
+k run tmp --restart=Never --rm --image=nginx:alpine -i -- curl http://project-plt-6cc-svc.pluto:3333
+```
