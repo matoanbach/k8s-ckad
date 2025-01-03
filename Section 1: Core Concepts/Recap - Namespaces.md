@@ -62,6 +62,13 @@ kind: ResourceQuota
 metadata:
     name: compute-quota
     namespace: dev
+spec:
+    hard:
+        pods: "10"
+        requests.cpu: "4"
+        requests.memory: 5Gi
+        limits.cpu: "10"
+        limits.memory: 10
 ```
 
 ### Updated hierarchy diagram added namespaces and nodes
