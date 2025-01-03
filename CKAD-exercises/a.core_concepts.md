@@ -17,6 +17,14 @@ kubernetes.io > Documentation > Tasks > Access Applications in a Cluster > [Use 
 <details><summary>show</summary>
 <p>
 
+```bash
+kubectl create namespace mynamespace
+```
+
+```bash
+kubectl run nginx --image=nginx -n mynamespace
+```
+
 </p>
 </details>
 
@@ -24,6 +32,11 @@ kubernetes.io > Documentation > Tasks > Access Applications in a Cluster > [Use 
 
 <details><summary>show</summary>
 <p>
+
+```bash
+kubectl run nginx --image=nginx -n mynamespace --dry-run=client -o yaml > nginx.yaml
+kubectl create -f nginx.yaml -n mynamespace
+```
 
 </p>
 </details>
@@ -33,6 +46,12 @@ kubernetes.io > Documentation > Tasks > Access Applications in a Cluster > [Use 
 <details><summary>show</summary>
 <p>
 
+```bash
+kubectl run busybox --image=busybox --restart=Never -it  --rm --command -- env
+kubectl run busybox --image=busybox --restart=Never --command -- env
+kubectl logs busybox
+```
+
 </p>
 </details>
 
@@ -40,6 +59,13 @@ kubernetes.io > Documentation > Tasks > Access Applications in a Cluster > [Use 
 
 <details><summary>show</summary>
 <p>
+
+```bash
+kubectl run busybox --image=busybox --restart=Never --command -- env --dry-run=client -o yaml > busybox.yaml
+cat busybox.yaml
+kubectl apply -f envpod.yaml
+kubectl logs busybox
+```
 
 </p>
 </details>
@@ -49,6 +75,11 @@ kubernetes.io > Documentation > Tasks > Access Applications in a Cluster > [Use 
 <details><summary>show</summary>
 <p>
 
+```bash
+kubectl create ns myns --dry-run=client -o yaml > myns.yaml
+cat myns.yaml
+```
+
 </p>
 </details>
 
@@ -56,6 +87,27 @@ kubernetes.io > Documentation > Tasks > Access Applications in a Cluster > [Use 
 
 <details><summary>show</summary>
 <p>
+
+```bash
+kubectl create quota myrq --hard=cpu=1,memory=1G,pods=2 --dry-run=client -o yaml
+```
+
+```yaml
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: myrq
+spec:
+  hard:
+    cpu: "1"
+    memory: 1Gi
+    pods: "2"
+  scopeSelector:
+    matchExpressions:
+      - operator: In
+    scopeName: PriorityClass
+    values: ["medium"]
+```
 
 </p>
 </details>
@@ -65,6 +117,11 @@ kubernetes.io > Documentation > Tasks > Access Applications in a Cluster > [Use 
 <details><summary>show</summary>
 <p>
 
+```bash
+kubectl get pod --all-namespaces
+kubectl get pod -A
+```
+
 </p>
 </details>
 
@@ -72,6 +129,10 @@ kubernetes.io > Documentation > Tasks > Access Applications in a Cluster > [Use 
 
 <details><summary>show</summary>
 <p>
+
+```bash
+kubectl run nginx --image=nginx --restart=Never --port=80
+```
 
 </p>
 </details>
@@ -81,6 +142,10 @@ kubernetes.io > Documentation > Tasks > Access Applications in a Cluster > [Use 
 <details><summary>show</summary>
 <p>
 
+```bash
+kubectl set image pod mypod nginx=nginx:1.24.0
+```
+
 </p>
 </details>
 
@@ -88,6 +153,11 @@ kubernetes.io > Documentation > Tasks > Access Applications in a Cluster > [Use 
 
 <details><summary>show</summary>
 <p>
+
+```bash
+kubectl get po -o wide
+kubectl run tmp --restart=Never --rm --image=busybox:alpine -it -- wget -O- [ip_address]
+```
 
 </p>
 </details>
@@ -97,6 +167,11 @@ kubernetes.io > Documentation > Tasks > Access Applications in a Cluster > [Use 
 <details><summary>show</summary>
 <p>
 
+```bash
+kubectl get pod mypod -o yaml
+kubectl get pod mypod -oyaml
+```
+
 </p>
 </details>
 
@@ -104,6 +179,10 @@ kubernetes.io > Documentation > Tasks > Access Applications in a Cluster > [Use 
 
 <details><summary>show</summary>
 <p>
+
+```bash
+kubectl describe pod mypod
+```
 
 </p>
 </details>
@@ -113,6 +192,10 @@ kubernetes.io > Documentation > Tasks > Access Applications in a Cluster > [Use 
 <details><summary>show</summary>
 <p>
 
+```bash
+kubectl logs mypod
+```
+
 </p>
 </details>
 
@@ -120,6 +203,11 @@ kubernetes.io > Documentation > Tasks > Access Applications in a Cluster > [Use 
 
 <details><summary>show</summary>
 <p>
+
+```bash
+kubectl logs nginx -p
+kubectl logs nginx --privious
+```
 
 </p>
 </details>
@@ -129,6 +217,10 @@ kubernetes.io > Documentation > Tasks > Access Applications in a Cluster > [Use 
 <details><summary>show</summary>
 <p>
 
+```bash
+kubectl exec mypod -it -- /bin/sh
+```
+
 </p>
 </details>
 
@@ -136,6 +228,12 @@ kubernetes.io > Documentation > Tasks > Access Applications in a Cluster > [Use 
 
 <details><summary>show</summary>
 <p>
+
+```bash
+kubectl run mypod --restart=Never --image=busybox --command -- /bin/sh -c 'echo "hello world"'
+# or
+kubectl run mypod --restart=Never --image=busybox --command -- echo "hello world"
+```
 
 </p>
 </details>
@@ -145,6 +243,10 @@ kubernetes.io > Documentation > Tasks > Access Applications in a Cluster > [Use 
 <details><summary>show</summary>
 <p>
 
+```bash
+kubectl run mypod --restart=Never -rm --image=busybox --command -- /bin/sh -c 'echo "hello world"'
+```
+
 </p>
 </details>
 
@@ -153,5 +255,12 @@ kubernetes.io > Documentation > Tasks > Access Applications in a Cluster > [Use 
 <details><summary>show</summary>
 <p>
 
+```bash
+kubectl run mypod --image=nginx --restart=Never --env=var1=val1
+kubectl exet -it nginx -- env
+kubectl exet -it nginx -- /bin/sh -c  'echo $var1'
+```
+
 </p>
 </details>
+```
