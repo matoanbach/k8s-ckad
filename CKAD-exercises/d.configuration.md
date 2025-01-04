@@ -255,6 +255,36 @@ echo -n admin > username
 <details><summary>show</summary>
 <p>
 
+```bash
+kubectl run nginx --image=nginx --restart=Never -o yaml --dry-run=client > pod.yaml
+vi pod.yaml
+```
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: nginx
+  name: nginx
+spec:
+  volumes: # specify the volumes
+  - name: foo # this name will be used for reference inside the container
+    secret: # we want a secret
+      secretName: mysecret2 # name of the secret - this must already exist on pod creation
+  containers:
+  - image: nginx
+    imagePullPolicy: IfNotPresent
+    name: nginx
+    resources: {}
+    volumeMounts: # our volume mounts
+    - name: foo # name on pod.spec.volumes
+      mountPath: /etc/foo #our mount path
+  dnsPolicy: ClusterFirst
+  restartPolicy: Never
+status: {}
+```
 </p>
 </details>
 
@@ -262,6 +292,42 @@ echo -n admin > username
 
 <details><summary>show</summary>
 <p>
+
+```bash
+kubectl delete po nginx
+kubectl run nginx --image=nginx --restart=Never -o yaml --dry-run=client > pod.yaml
+vi pod.yaml
+```
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: nginx
+  name: nginx
+spec:
+  containers:
+    - image: nginx
+      imagePullPolicy: IfNotPresent
+      name: nginx
+      resources: {}
+      env: # our env variables
+        - name: USERNAME # asked name
+          valueFrom:
+            secretKeyRef: # secret reference
+              name: mysecret2 # our secret's name
+              key: username # the key of the data in the secret
+  dnsPolicy: ClusterFirst
+  restartPolicy: Never
+status: {}
+```
+
+```bash
+kubectl create -f pod.yaml
+kybectl exec -it nginx -- env | grep USERNAME | cut -d '=' -f 2 
+```
 
 </p>
 </details>
@@ -271,6 +337,10 @@ echo -n admin > username
 <details><summary>show</summary>
 <p>
 
+```bash
+k create secret generic ext-service-secret -n secret-ops --from-literal=API_KEY=LmLHbYhsgWZwNifiqaRorH8T
+```
+
 </p>
 </details>
 
@@ -278,6 +348,35 @@ echo -n admin > username
 
 <details><summary>show</summary>
 <p>
+
+```bash
+export ns="-n secret-ops"
+export do="--dry-run=client -oyaml"
+k run consumer --image=nginx $ns $do > nginx.yaml
+vi nginx.yaml
+```
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: consumer
+  name: consumer
+  namespace: secret-ops
+spec:
+  containers:
+    - image: nginx
+      name: consumer
+      resources: {}
+      env:
+        - name: API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: ext-service-secret
+              key: API_KEY
+```
 
 </p>
 </details>
@@ -287,6 +386,17 @@ echo -n admin > username
 <details><summary>show</summary>
 <p>
 
+```bash
+export do="--dry-run=client -oyaml"
+export ns="-n secret-ops"
+
+# if id_rsa file didn't exist
+ssh-keygen
+
+k create secret generic $ns --type="kubernetes.io/ssh-auth" --from-file=ssh-privatekey=id_rsa $do > sc.yaml
+k apply -f sc.yaml
+```
+
 </p>
 </details>
 
@@ -294,6 +404,41 @@ echo -n admin > username
 
 <details><summary>show</summary>
 <p>
+
+```bash
+export ns="-n secret-ops"
+export do="--dry-run=client -oyaml"
+```
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: consumer
+  name: consumer
+  namespace: secret-ops
+spec:
+  containers:
+    - image: nginx
+      name: consumer
+      volumeMounts:
+        - name: foo
+          mountPath: /var/app
+          readOnly: true
+  volumes:
+    - name: foo
+      secret:
+        secretName: my-secret
+        optional: true
+  restartPolicy: Always
+```
+
+```bash
+k exec -it $ns consumer -- /bin/sh
+cat /var/app/ssh-privatekey
+exit
+```
 
 </p>
 </details>
@@ -315,6 +460,10 @@ kubernetes.io > Documentation > Tasks > Configure Pods and Containers > [Configu
 <details><summary>show</summary>
 <p>
 
+```bash
+kubectl create sa myuser
+```
+
 </p>
 </details>
 
@@ -322,6 +471,31 @@ kubernetes.io > Documentation > Tasks > Configure Pods and Containers > [Configu
 
 <details><summary>show</summary>
 <p>
+
+```bash
+kubectl run nginx --image=nginx --restart=Never -o yaml --dry-run=client > pod.yaml
+vim pod.yaml
+```
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: nginx
+  name: nginx
+spec:
+  serviceAccountName: myuser # we use pod.spec.serviceAccountName
+  containers:
+    - image: nginx
+      imagePullPolicy: IfNotPresent
+      name: nginx
+      resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Never
+status: {}
+```
 
 </p>
 </details>
