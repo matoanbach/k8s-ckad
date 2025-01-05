@@ -281,7 +281,7 @@ spec:
     volumeMounts: # our volume mounts
     - name: foo # name on pod.spec.volumes
       mountPath: /etc/foo #our mount path
-  dnsPolicy: ClusterFirst
+  dnsPolicy: ClusterFirst 
   restartPolicy: Never
 status: {}
 ```
