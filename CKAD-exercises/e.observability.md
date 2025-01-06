@@ -1,4 +1,5 @@
 ![](https://gaforgithub.azurewebsites.net/api?repo=CKAD-exercises/observability&empty)
+
 # Observability (18%)
 
 ## Liveness, readiness and startup probes
@@ -10,37 +11,20 @@ kubernetes.io > Documentation > Tasks > Configure Pods and Containers > [Configu
 <details><summary>show</summary>
 <p>
 
-```bash
-kubectl run nginx --image=nginx --restart=Never --dry-run=client -o yaml > pod.yaml
-vi pod.yaml
-```
-
-```YAML
-apiVersion: v1
-kind: Pod
-metadata:
-  creationTimestamp: null
-  labels:
-    run: nginx
-  name: nginx
-spec:
-  containers:
-  - image: nginx
-    imagePullPolicy: IfNotPresent
-    name: nginx
-    resources: {}
-    livenessProbe: # our probe
-      exec: # add this line
-        command: # command definition
-        - ls # ls command
-  dnsPolicy: ClusterFirst
-  restartPolicy: Never
-status: {}
+```yaml
+containers:
+- name: nginx
+  image: nginx
+  ...
+  livenessProbe:
+    exec:
+      command:
+        - ls
 ```
 
 ```bash
 kubectl create -f pod.yaml
-kubectl describe pod nginx | grep -i liveness # run this to see that liveness probe works
+kubectl describe pod nginx | grep -i liveness
 kubectl delete -f pod.yaml
 ```
 
@@ -52,39 +36,23 @@ kubectl delete -f pod.yaml
 <details><summary>show</summary>
 <p>
 
-```bash
-kubectl explain pod.spec.containers.livenessProbe # get the exact names
-```
-
-```YAML
-apiVersion: v1
-kind: Pod
-metadata:
-  creationTimestamp: null
-  labels:
-    run: nginx
-  name: nginx
-spec:
-  containers:
-  - image: nginx
-    imagePullPolicy: IfNotPresent
-    name: nginx
-    resources: {}
-    livenessProbe:
-      initialDelaySeconds: 5 # add this line
-      periodSeconds: 5 # add this line as well
-      exec:
-        command:
+```yaml
+containers:
+- name: nginx
+  image: nginx
+  ...
+  livenessProbe:
+    exec:
+      command:
         - ls
-  dnsPolicy: ClusterFirst
-  restartPolicy: Never
-status: {}
+    initialDelaySeconds: 5
+    periodSeconds: 5
 ```
 
 ```bash
 kubectl create -f pod.yaml
-kubectl describe po nginx | grep -i liveness
-kubectl delete -f pod.yaml
+kubectl describe pod pod1 | grep -i liveness
+kubectl delete pod pod1
 ```
 
 </p>
@@ -96,60 +64,30 @@ kubectl delete -f pod.yaml
 <p>
 
 ```bash
-kubectl run nginx --image=nginx --dry-run=client -o yaml --restart=Never --port=80 > pod.yaml
+kubectl run nginx --image=nginx --port=80 --dry-run=client -o yaml > pod.yaml
 vi pod.yaml
 ```
 
-```YAML
-apiVersion: v1
-kind: Pod
-metadata:
-  creationTimestamp: null
-  labels:
-    run: nginx
-  name: nginx
-spec:
-  containers:
-  - image: nginx
-    imagePullPolicy: IfNotPresent
-    name: nginx
-    resources: {}
-    ports:
-    - containerPort: 80 # Note: Readiness probes runs on the container during its whole lifecycle. Since nginx exposes 80, containerPort: 80 is not required for readiness to work.
-    readinessProbe: # declare the readiness probe
-      httpGet: # add this line
-        path: / #
-        port: 80 #
-  dnsPolicy: ClusterFirst
-  restartPolicy: Never
-status: {}
-```
-
-```bash
-kubectl create -f pod.yaml
-kubectl describe pod nginx | grep -i readiness # to see the pod readiness details
-kubectl delete -f pod.yaml
+```yaml
+containers:
+- name: nginx
+  image: nginx
+  ...
+  ports:
+  - containerPort: 80
+  livenessProbe:
+    httpGet:
+      path: /
+      port: 80
 ```
 
 </p>
 </details>
 
-### Lots of pods are running in `qa`,`alan`,`test`,`production` namespaces.  All of these pods are configured with liveness probe.  Please list all pods whose liveness probe are failed in the format of `<namespace>/<pod name>` per line.
+### Lots of pods are running in `qa`,`alan`,`test`,`production` namespaces. All of these pods are configured with liveness probe. Please list all pods whose liveness probe are failed in the format of `<namespace>/<pod name>` per line.
 
 <details><summary>show</summary>
 <p>
-
-A typical liveness probe failure event
-```
-LAST SEEN   TYPE      REASON      OBJECT              MESSAGE
-22m         Warning   Unhealthy   pod/liveness-exec   Liveness probe failed: cat: can't open '/tmp/healthy': No such file or directory
-```
-
-collect failed pods namespace by namespace
-
-```sh
-kubectl get events -o json | jq -r '.items[] | select(.message | contains("Liveness probe failed")).involvedObject | .namespace + "/" + .name'
-```
 
 </p>
 </details>
@@ -162,8 +100,7 @@ kubectl get events -o json | jq -r '.items[] | select(.message | contains("Liven
 <p>
 
 ```bash
-kubectl run busybox --image=busybox --restart=Never -- /bin/sh -c 'i=0; while true; do echo "$i: $(date)"; i=$((i+1)); sleep 1; done'
-kubectl logs busybox -f # follow the logs
+kubectl run tmp --image=busybox --restart=Never -- /bin/sh -c 'i=0; while true; do echo "$i: $(date)"; i=$((i+1)); sleep 1; done'
 ```
 
 </p>
@@ -177,11 +114,7 @@ kubectl logs busybox -f # follow the logs
 <p>
 
 ```bash
-kubectl run busybox --restart=Never --image=busybox -- /bin/sh -c 'ls /notexist'
-# show that there's an error
-kubectl logs busybox
-kubectl describe po busybox
-kubectl delete po busybox
+kubectl run tmp --image=busybox --restart=Never -- /bin/sh -c 'ls /notexist'
 ```
 
 </p>
@@ -193,26 +126,16 @@ kubectl delete po busybox
 <p>
 
 ```bash
-kubectl run busybox --restart=Never --image=busybox -- notexist
-kubectl logs busybox # will bring nothing! container never started
-kubectl describe po busybox # in the events section, you'll see the error
-# also...
-kubectl get events | grep -i error # you'll see the error here as well
-kubectl delete po busybox --force --grace-period=0
+kubectl run tmp --image=busybox --restart=Never -- /bin/sh -c 'notexist'
 ```
 
 </p>
 </details>
 
-
 ### Get CPU/memory utilization for nodes ([metrics-server](https://github.com/kubernetes-incubator/metrics-server) must be running)
 
 <details><summary>show</summary>
 <p>
-
-```bash
-kubectl top nodes
-```
 
 </p>
 </details>
