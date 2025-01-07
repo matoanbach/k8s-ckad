@@ -403,3 +403,91 @@ Step 4: delete the old pod running
 ```bash
 k -n pluto delete pod holy-api --force --grace-period=0
 ```
+
+## Question 10: Service, Logs
+
+Solve this question on instance: ssh ckad9043
+
+Team Pluto needs a new cluster internal Service. Create a ClusterIP Service named project-plt-6cc-svc in Namespace pluto. This Service should expose a single Pod named project-plt-6cc-api of image nginx:1.17.3-alpine, create that Pod as well. The Pod should be identified by label project: plt-6cc-api. The Service should use tcp port redirection of 3333:80.
+
+Finally use for example curl from a temporary nginx:alpine Pod to get the response from the Service. Write the response into /opt/course/10/service_test.html on ckad9043. Also check if the logs of Pod project-plt-6cc-api show the request and write those into /opt/course/10/service_test.log on ckad9043.
+
+### Answer:
+
+Step 1: switch context
+
+```bash
+ksn pluto
+```
+
+Step 2: create the pod to expose
+
+```bash
+k run -n pluto project-plt-6cc-api --image=nginx:1.17.3-alpine -l project=plt-6cc-api
+```
+
+Step 3: create a service for the pod
+
+```bash
+k expose pod project-plt-6cc-api --name=project-plt-6cc-svc -n pluto --port=3333 --target-port=80
+```
+
+Step 4: Check the connectivity
+
+```bash
+k get ep
+k run tmp --restart=Never --image=nginx:alpine --rm -it -- curl -m 5 project-plt-6cc-svc.pluto:3333
+```
+
+## Question 11: Working with Containers
+
+Solve this question on instance: ssh ckad9043
+
+There are files to build a container image located at /opt/course/11/image on ckad9043. The container will run a Golang application which outputs information to stdout. You're asked to perform the following tasks:
+
+1. Change the Dockerfile: set ENV variable SUN_CIPHER_ID to hardcoded value 5b9c1065-e39d-4a43-a04a-e59bcea3e03f
+
+2. Build the image using sudo docker, tag it registry.killer.sh:5000/sun-cipher:v1-docker and push it to the registry
+
+3. Build the image using sudo podman, tag it registry.killer.sh:5000/sun-cipher:v1-podman and push it to the registry
+
+4. Run a container using sudo podman, which keeps running detached in the background, named sun-cipher using image registry.killer.sh:5000/sun-cipher:v1-podman
+
+5. Write the logs your container sun-cipher produces into /opt/course/11/logs on ckad9043
+
+
+### Answer:
+
+2. 
+
+```bash
+sudo docker build -t registry.killer.sh:5000/sun-cipher:v1-docker /opt/course/11/image
+sudo docker image ls
+```
+
+```bash
+sudo docker push registry.killer.sh:5000/sun-cipher:v1-docker 
+```
+
+3. 
+
+```bash
+sudo podman build -t registry.killer.sh:5000/sun-cipher:v1-podman 
+sudo podman image ls
+```
+
+```bash
+sudo podman push registry.killer.sh:5000/sun-cipher:v1-podman
+```
+
+4. 
+
+```bash
+sudo podman run -d --name=sun-cipher registry.killer.sh:5000/sun-cipher:v1-podman 
+```
+
+5. 
+
+```bash
+sudo podman logs sun-cipher > /opt/course/11/logs 
+```
