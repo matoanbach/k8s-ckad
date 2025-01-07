@@ -152,3 +152,254 @@ helm ls -a
 
 helm uninstall internal-issue-report-daniel
 ```
+
+## Question 5: ServiceAccount, Secret
+
+Solve this question on instance: ssh ckad7326
+
+Team Neptune has its own ServiceAccount named neptune-sa-v2 in Namespace neptune. A coworker needs the token from the Secret that belongs to that ServiceAccount. Write the base64 decoded token to file /opt/course/5/token on ckad7326.
+
+### Answer:
+
+Step 1:
+
+```bash
+kubectl config set-context --current --namespace=neptune
+```
+
+Step 2:
+
+```bash
+kubectl get sa neptune-sa-v2 -oyaml
+echo "token" | base64 -d
+```
+
+or
+
+```bash
+kubectl describe sa neptune-sa-v2
+```
+
+Step 3:
+
+```bash
+echo token > /opt/course/5/token
+```
+
+## Question 6: ReadinessProbe
+
+Solve this question on instance: ssh ckad5601
+
+Create a single Pod named pod6 in Namespace default of image busybox:1.31.0. The Pod should have a readiness-probe executing cat /tmp/ready. It should initially wait 5 and periodically wait 10 seconds. This will set the container ready only if the file /tmp/ready exists.
+
+The Pod should run the command touch /tmp/ready && sleep 1d, which will create the necessary file to be ready and then idles. Create the Pod and confirm it starts.
+
+### Answer:
+
+```bash
+kubectl run pod6 -n default --image=busybox:1.31.0 --dry-run=client -oyaml --command -- sh -c "touch /tmp/ready && sleep 1d" > 6.yaml
+vim 6.yaml
+```
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: pod6
+  name: pod6
+  namespace: default
+spec:
+  containers:
+    - image: busybox:1.31.0
+      name: pod6
+      resources: {}
+      command:
+        - /bin/sh
+        - -c
+        - "touch /tmp/ready && sleep 1d"
+      readinessProbe:
+        exec:
+          command:
+            - cat
+            - /tmp/ready
+        initialDelaySeconds: 5
+        periodSeconds: 10
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}
+```
+
+```bash
+k create -f 6.yaml
+k get pod pod6
+```
+
+## Question 7: Pods, Namespaces
+
+Solve this question on instance: ssh ckad7326
+
+The board of Team Neptune decided to take over control of one e-commerce webserver from Team Saturn. The administrator who once setup this webserver is not part of the organisation any longer. All information you could get was that the e-commerce system is called my-happy-shop.
+
+Search for the correct Pod in Namespace saturn and move it to Namespace neptune. It doesn't matter if you shut it down and spin it up again, it probably hasn't any customers anyways.
+
+### Answer:
+
+```bash
+kubectl config set-context --current --namespace=saturn
+```
+
+```bash
+kubectl describe pod # look for the pod with keyword of "my-happy-shop"
+kubectl get pod webserver-sat-003 -oyaml > 7.yaml
+kubectl delete --force webserver-sat-003
+vim 7.yaml
+```
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: pod7
+  name: webserver-sat-003
+  namespace: neptune # CHANGED
+```
+
+```bash
+k create -f 7.yaml
+```
+
+## Question 8: Deployment, Rollouts
+
+Solve this question on instance: ssh ckad7326
+
+There is an existing Deployment named api-new-c32 in Namespace neptune. A developer did make an update to the Deployment but the updated version never came online. Check the Deployment history and find a revision that works, then rollback to it. Could you tell Team Neptune what the error was so it doesn't happen again?
+
+### Answer:
+
+```bash
+ksn neptune
+```
+
+```bash
+kubectl get deploy
+kubectl rollout history
+```
+
+```bash
+k get deploy,pod | grep api-new-c32
+k describe pod api-new-c32-7d64747c87 | grep -i error
+k describe pod api-new-c32-7d64747c87 | grep -i image
+```
+
+Let's revert to the previous version:
+
+```bash
+k rollout undo deploy api-new-c32
+```
+
+or
+
+```bash
+k rollout undo deploy api-new-c32 --to-revision=4
+```
+
+Verify it works:
+
+```bash
+k get deploy pod
+```
+
+## Question 9: Pod -> Deployment
+
+Solve this question on instance: ssh ckad9043
+
+In Namespace pluto there is single Pod named holy-api. It has been working okay for a while now but Team Pluto needs it to be more reliable.
+
+Convert the Pod into a Deployment named holy-api with 3 replicas and delete the single Pod once done. The raw Pod template file is available at /opt/course/9/holy-api-pod.yaml.
+
+In addition, the new Deployment should set allowPrivilegeEscalation: false and privileged: false for the security context on container level.
+
+Please create the Deployment and save its yaml under /opt/course/9/holy-api-deployment.yaml on ckad9043.
+
+### Answer:
+
+```bash
+ksn pluto
+```
+
+Step 1: make a back up yaml
+
+```bash
+cat /opt/course/9/holy-api-pod.yaml > /opt/course/9/holy-api-deployment.yaml
+vim /opt/course/9/holy-api-deployment.yaml
+```
+
+Step 2: convert pod to deployment
+
+```yaml
+# /opt/course/9/holy-api-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: holy-api # name stays the same
+  namespace: pluto # important
+spec:
+  replicas: 3 # 3 replicas
+  selector:
+    matchLabels:
+      id: holy-api # set the correct selector
+  template:
+    # => from here down its the same as the pods metadata: and spec: sections
+    metadata:
+      labels:
+        id: holy-api
+      name: holy-api
+    spec:
+      containers:
+        - env:
+            - name: CACHE_KEY_1
+              value: b&MTCi0=[T66RXm!jO@
+            - name: CACHE_KEY_2
+              value: PCAILGej5Ld@Q%{Q1=#
+            - name: CACHE_KEY_3
+              value: 2qz-]2OJlWDSTn_;RFQ
+          image: nginx:1.17.3-alpine
+          name: holy-api-container
+          securityContext: # add
+            allowPrivilegeEscalation: false # add
+            privileged: false # add
+          volumeMounts:
+            - mountPath: /cache1
+              name: cache-volume1
+            - mountPath: /cache2
+              name: cache-volume2
+            - mountPath: /cache3
+              name: cache-volume3
+      volumes:
+        - emptyDir: {}
+          name: cache-volume1
+        - emptyDir: {}
+          name: cache-volume2
+        - emptyDir: {}
+          name: cache-volume3
+```
+
+To indent multiple lines using `vim` you should set the shiftwidth using `:set shiftwidth=2`. Then mark multiple lines using `Shift V` and the up/down keys
+
+To then indent the marked lines press `>` or `<` and to repeat the action press `.`
+
+Step 3:
+
+```bash
+k create -f /opt/course/9/holy-api-deployment.yaml
+```
+
+Step 4: delete the old pod running
+
+```bash
+k -n pluto delete pod holy-api --force --grace-period=0
+```
