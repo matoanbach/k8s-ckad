@@ -19,16 +19,6 @@ kubernetes.io > Documentation > Concepts > Overview > Working with Kubernetes Ob
 <details><summary>show</summary>
 <p>
 
-```bash
-kubectl run nginx1 --image=nginx --labels=app=v1
-kubectl run nginx2 --image=nginx --labels=app=v1
-kubectl run nginx3 --image=nginx --labels=app=v1
-```
-
-```bash
-for i in `seq 1 3`; do kubectl run nginx$i --image=nginx --restart=Never -l app=v1; done
-```
-
 </p>
 </details>
 
@@ -36,10 +26,6 @@ for i in `seq 1 3`; do kubectl run nginx$i --image=nginx --restart=Never -l app=
 
 <details><summary>show</summary>
 <p>
-
-```bash
-kubectl get pods --show-labels
-```
 
 </p>
 </details>
@@ -49,10 +35,6 @@ kubectl get pods --show-labels
 <details><summary>show</summary>
 <p>
 
-```bash
-kubectl label pod nginx2 --overwrite app=v2
-```
-
 </p>
 </details>
 
@@ -60,11 +42,6 @@ kubectl label pod nginx2 --overwrite app=v2
 
 <details><summary>show</summary>
 <p>
-
-```bash
-kubectl get pod -L app
-kubectl get pod --label-columns=app
-```
 
 </p>
 </details>
@@ -74,11 +51,6 @@ kubectl get pod --label-columns=app
 <details><summary>show</summary>
 <p>
 
-```bash
-kubectl get pod -l app=v2
-kubectl get po --selector=app=v2
-```
-
 </p>
 </details>
 
@@ -86,10 +58,6 @@ kubectl get po --selector=app=v2
 
 <details><summary>show</summary>
 <p>
-
-```bash
-kubectl label pod -l "app in (v1, v2)" tier=web
-```
 
 </p>
 </details>
@@ -99,10 +67,6 @@ kubectl label pod -l "app in (v1, v2)" tier=web
 <details><summary>show</summary>
 <p>
 
-```bash
-kubectl annotate pod -l app=v2 owner=marketing
-```
-
 </p>
 </details>
 
@@ -110,12 +74,6 @@ kubectl annotate pod -l app=v2 owner=marketing
 
 <details><summary>show</summary>
 <p>
-
-```bash
-kubectl label pod nginx1 nginx2 nginx3 app-
-kubectl lable pod nginx{1..3} app-
-kubectl lable pod -l app app-
-```
 
 </p>
 </details>
@@ -125,10 +83,6 @@ kubectl lable pod -l app app-
 <details><summary>show</summary>
 <p>
 
-```bash
-kubectl annotate pod nginx{1..3} description='my description'
-```
-
 </p>
 </details>
 
@@ -136,14 +90,6 @@ kubectl annotate pod nginx{1..3} description='my description'
 
 <details><summary>show</summary>
 <p>
-
-```bash
-kubectl annotate pod nginx1 --list
-
-kubectl describe po nginx1 | grep -i 'annotate'
-
-kubectl get pod nginx1 -o custom-columns=Name.metadata.name, ANNOTATIONS:metadata.annotations.description
-```
 
 </p>
 </details>
@@ -153,10 +99,6 @@ kubectl get pod nginx1 -o custom-columns=Name.metadata.name, ANNOTATIONS:metadat
 <details><summary>show</summary>
 <p>
 
-```bash
-kubectl annotate nginx{1..3} description- owner-
-```
-
 </p>
 </details>
 
@@ -164,10 +106,6 @@ kubectl annotate nginx{1..3} description- owner-
 
 <details><summary>show</summary>
 <p>
-
-```bash
-kubectl delete pods nginx{1..3}
-```
 
 </p>
 </details>
@@ -179,23 +117,6 @@ kubectl delete pods nginx{1..3}
 <details><summary>show</summary>
 <p>
 
-```bash
-kubectl run pod --image=nginx --restart=Never
-```
-
-```yaml
-containers:
-  ...
-  nodeSelector:
-    accelerator=nvidia-tesla-p100
-```
-
-You can easily find out where in the YAML it should be placed by:
-
-```bash
-kubectl explain po.spec
-```
-
 </p>
 </details>
 
@@ -204,22 +125,6 @@ kubectl explain po.spec
 <details><summary>show</summary>
 <p>
 
-```bash
-kubectl taint node node1 tier=frontend:NoSechule
-```
-
-```yaml
-spec:
-  containers:
-  ...
-  tolerations:
-  - key: "tier"
-    operator: "Equal"
-    value: "frontend"
-    effect: "NoSchedule"
-
-```
-
 </p>
 </details>
 
@@ -227,22 +132,6 @@ spec:
 
 <details><summary>show</summary>
 <p>
-
-```yaml
-spec:
-  containers:
-  ...
-  nodeSelector:
-    kubernetes.io/hostname: controlplane
-  tolerations:
-  - key: "node-role.kubernetes.io/control-plane"
-    operator: "Exists"
-    effect: "NoSchedule"
-```
-
-```bash
-kubectl create -f pod.yaml
-```
 
 </p>
 </details>
@@ -256,10 +145,6 @@ kubernetes.io > Documentation > Concepts > Workloads > Workload Resources > [Dep
 <details><summary>show</summary>
 <p>
 
-```bash
-kubectl create deployment nginx --image=nginx:1.18.0 --replicas=2 --port 80
-```
-
 </p>
 </details>
 
@@ -268,10 +153,6 @@ kubectl create deployment nginx --image=nginx:1.18.0 --replicas=2 --port 80
 <details><summary>show</summary>
 <p>
 
-```bash
-kubectl get deployment nginx -oyaml
-```
-
 </p>
 </details>
 
@@ -279,10 +160,6 @@ kubectl get deployment nginx -oyaml
 
 <details><summary>show</summary>
 <p>
-
-```bash
-kubectl get replicaset replica-deploy-sad0ij1noe -oyaml
-```
 
 </p>
 </details>
@@ -300,10 +177,6 @@ kubectl get replicaset replica-deploy-sad0ij1noe -oyaml
 <details><summary>show</summary>
 <p>
 
-```bash
-kubectl rollout status deployment/nginx
-```
-
 </p>
 </details>
 
@@ -311,10 +184,6 @@ kubectl rollout status deployment/nginx
 
 <details><summary>show</summary>
 <p>
-
-```bash
-kubectl set image deployment/nginx nginx=nginx:1.19.8
-```
 
 </p>
 </details>
@@ -324,10 +193,6 @@ kubectl set image deployment/nginx nginx=nginx:1.19.8
 <details><summary>show</summary>
 <p>
 
-```bash
-kubeclt rollout history deployment/nginx
-```
-
 </p>
 </details>
 
@@ -335,10 +200,6 @@ kubeclt rollout history deployment/nginx
 
 <details><summary>show</summary>
 <p>
-
-```bash
-kubeclt rollout undo deployment/nginx
-```
 
 </p>
 </details>
@@ -348,10 +209,6 @@ kubeclt rollout undo deployment/nginx
 <details><summary>show</summary>
 <p>
 
-```bash
-kubeclt set image deployment/nginx nginx=nginx:1.91
-```
-
 </p>
 </details>
 
@@ -359,10 +216,6 @@ kubeclt set image deployment/nginx nginx=nginx:1.91
 
 <details><summary>show</summary>
 <p>
-
-```bash
-kubeclt rollout status deployment/nginx
-```
 
 </p>
 </details>
@@ -372,10 +225,6 @@ kubeclt rollout status deployment/nginx
 <details><summary>show</summary>
 <p>
 
-```bash
-kubeclt rollout undo deployment/nginx --to-revision=2
-```
-
 </p>
 </details>
 
@@ -383,10 +232,6 @@ kubeclt rollout undo deployment/nginx --to-revision=2
 
 <details><summary>show</summary>
 <p>
-
-```bash
-kubeclt rollout history deployment/nginx --revision=2
-```
 
 </p>
 </details>
@@ -396,10 +241,6 @@ kubeclt rollout history deployment/nginx --revision=2
 <details><summary>show</summary>
 <p>
 
-```bash
-kubectl scale deployment/nginx --replicas=5
-```
-
 </p>
 </details>
 
@@ -407,10 +248,6 @@ kubectl scale deployment/nginx --replicas=5
 
 <details><summary>show</summary>
 <p>
-
-```bash
-kubectl autoscale deploy nginx --min=4 --max=10 --cpu-percentage=80
-```
 
 </p>
 </details>
@@ -420,10 +257,6 @@ kubectl autoscale deploy nginx --min=4 --max=10 --cpu-percentage=80
 <details><summary>show</summary>
 <p>
 
-```bash
-kubectl rollout pause deployment nginx
-```
-
 </p>
 </details>
 
@@ -431,12 +264,6 @@ kubectl rollout pause deployment nginx
 
 <details><summary>show</summary>
 <p>
-
-```bash
-kubectl set image deployment nginx nginx=nginx:1.19.9
-
-kubectl rollout history deploy nginx # no new revision
-```
 
 </p>
 </details>
@@ -446,12 +273,6 @@ kubectl rollout history deploy nginx # no new revision
 <details><summary>show</summary>
 <p>
 
-```bash
-kubectl rollout resume deployment nginx
-
-kubectl rollout history deployment nginx
-```
-
 </p>
 </details>
 
@@ -460,15 +281,6 @@ kubectl rollout history deployment nginx
 <details><summary>show</summary>
 <p>
 
-```bash
-kubectl delete deploy nginx
-kubectl delete hpa nginx
-
-#or
-
-kubectl delete deploy/nginx hpa/nginx
-```
-
 </p>
 </details>
 
@@ -476,26 +288,6 @@ kubectl delete deploy/nginx hpa/nginx
 
 <details><summary>show</summary>
 <p>
-
-```bash
-kubectl create deployment nginx --image=nginx --replicas=75 --labels=version=v1,app=backend
-
-kubectl expose deployment nginx --name=deploy-service --port=80 --selector=app=backend
-# test the service
-kubectl run tmp --restart=Never --image=nginx:alpine --rm --it -- wget -O- deploy-service
-
-kubectl create deployment nginx --image=nginx --replicas=25 --labels=version=v2,app=backend
-```
-
-Observe that calling the ip exposed by the service the requests are load balanced across the two versions:
-
-```bash
-kubectl run tmp --restart=Never --image=nginx:alpine --rm -it -- /bin/sh -c "for i in `seq 1 10`; do wget -wO- deploy-service; done"
-
-#or
-
-kubectl run tmp --restart=Never --image=nginx:alpine --rm -it -- /bin/sh -c "while sleep 1; do wget -O- deploy-service; done"
-```
 
 </p>
 </details>
@@ -507,10 +299,6 @@ kubectl run tmp --restart=Never --image=nginx:alpine --rm -it -- /bin/sh -c "whi
 <details><summary>show</summary>
 <p>
 
-```bash
-kubectl create job pi --image=perl:5.34 -- perl -Mbignum=bpi -wle 'print bpi(2000)'
-```
-
 </p>
 </details>
 
@@ -518,13 +306,6 @@ kubectl create job pi --image=perl:5.34 -- perl -Mbignum=bpi -wle 'print bpi(200
 
 <details><summary>show</summary>
 <p>
-
-```bash
-kubectl get jobs -w # wait till 'SUCCESSFUL' is 1 (will take some time, perl image might be big)
-kubectl get po # get the pod name
-kubectl logs pi-**** # get the pi numbers
-kubectl delete job pi
-```
 
 </p>
 </details>
@@ -534,10 +315,6 @@ kubectl delete job pi
 <details><summary>show</summary>
 <p>
 
-```bash
-kubectl create job busybox --imnage=busybox -- /bin/sh -c 'echo hello;sleep 30;echo world's
-```
-
 </p>
 </details>
 
@@ -545,11 +322,6 @@ kubectl create job busybox --imnage=busybox -- /bin/sh -c 'echo hello;sleep 30;e
 
 <details><summary>show</summary>
 <p>
-
-```bash
-kubectl get po # find the job pod
-kubectl logs busybox-ptx58 -f # follow the logs
-```
 
 </p>
 </details>
@@ -559,11 +331,6 @@ kubectl logs busybox-ptx58 -f # follow the logs
 <details><summary>show</summary>
 <p>
 
-```bash
-kubectl describe job ...
-kubectl logs job...
-```
-
 </p>
 </details>
 
@@ -572,10 +339,6 @@ kubectl logs job...
 <details><summary>show</summary>
 <p>
 
-```bash
-kubectl delete job ...
-```
-
 </p>
 </details>
 
@@ -583,23 +346,6 @@ kubectl delete job ...
 
 <details><summary>show</summary>
 <p>
-
-```yaml
-apiVersion: batch/v1
-kind: Job
-metadata:
-  name: pi
-spec:
-  activeDeadlineSeconds: 30
-  template:
-    spec:
-      containers:
-        - name: pi
-          image: perl:5.34.0
-          command: ["perl", "-Mbignum=bpi", "-wle", "print bpi(2000)"]
-      restartPolicy: Never
-  backoffLimit: 4
-```
 
 </p>
 </details>
@@ -629,10 +375,6 @@ kubernetes.io > Documentation > Tasks > Run Jobs > [Running Automated Tasks with
 <details><summary>show</summary>
 <p>
 
-```bash
-kubectl create cronjob busybox --image=busybox --schedule="*/1 * * * *" -- /bin/sh -c "date; echo Hello from the Kubernetes cluster"
-```
-
 </p>
 </details>
 
@@ -640,12 +382,6 @@ kubectl create cronjob busybox --image=busybox --schedule="*/1 * * * *" -- /bin/
 
 <details><summary>show</summary>
 <p>
-
-```bash
-kubectl logs cronjob/busybox
-
-kubectl delete cronjob/busybox
-```
 
 </p>
 </details>
@@ -655,13 +391,6 @@ kubectl delete cronjob/busybox
 <details><summary>show</summary>
 <p>
 
-```bash
-kubectl get cj
-kubectl get jobs --watch
-kubectl get po --show-labels
-kubectl logs ....
-```
-
 </p>
 </details>
 
@@ -669,41 +398,6 @@ kubectl logs ....
 
 <details><summary>show</summary>
 <p>
-
-```bash
-kubectl create cronjob time-limited-job --image=busybox --restart=Never --dry-run=client --schedule="* * * * *" -o yaml -- /bin/sh -c 'date; echo Hello from the Kubernetes cluster' > time-limited-job.yaml
-vi time-limited-job.yaml
-```
-
-```yaml
-apiVersion: batch/v1
-kind: CronJob
-metadata:
-  creationTimestamp: null
-  name: time-limited-job
-spec:
-  startingDeadlineSeconds: 17 # add this line
-  jobTemplate:
-    metadata:
-      creationTimestamp: null
-      name: time-limited-job
-    spec:
-      template:
-        metadata:
-          creationTimestamp: null
-        spec:
-          containers:
-            - args:
-                - /bin/sh
-                - -c
-                - date; echo Hello from the Kubernetes cluster
-              image: busybox
-              name: time-limited-job
-              resources: {}
-          restartPolicy: Never
-  schedule: "* * * * *"
-status: {}
-```
 
 </p>
 </details>
@@ -713,41 +407,6 @@ status: {}
 <details><summary>show</summary>
 <p>
 
-```bash
-kubectl create cronjob time-limited-job --image=busybox --restart=Never --dry-run=client --schedule="* * * * *" -o yaml -- /bin/sh -c 'date; echo Hello from the Kubernetes cluster' > time-limited-job.yaml
-vi time-limited-job.yaml
-```
-
-```yaml
-apiVersion: batch/v1
-kind: CronJob
-metadata:
-  creationTimestamp: null
-  name: time-limited-job
-spec:
-  jobTemplate:
-    metadata:
-      creationTimestamp: null
-      name: time-limited-job
-    spec:
-      activeDeadlineSeconds: 12 # add this line
-      template:
-        metadata:
-          creationTimestamp: null
-        spec:
-          containers:
-            - args:
-                - /bin/sh
-                - -c
-                - date; echo Hello from the Kubernetes cluster
-              image: busybox
-              name: time-limited-job
-              resources: {}
-          restartPolicy: Never
-  schedule: "* * * * *"
-status: {}
-```
-
 </p>
 </details>
 
@@ -755,10 +414,6 @@ status: {}
 
 <details><summary>show</summary>
 <p>
-
-```bash
-kubectl create job --from=cronjob/sample-cron-job sample-job
-```
 
 </p>
 </details>

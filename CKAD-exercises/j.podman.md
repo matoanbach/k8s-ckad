@@ -87,6 +87,7 @@ Hello, World!
 :~$ podman exec -it test cat /usr/local/apache2/htdocs/index.html
 Hello, World!
 ```
+
 </p>
 </details>
 
@@ -106,32 +107,10 @@ Hello, World!
 </p>
 </details>
 
- Verify that the registry contains the pushed image and that you can pull it
+Verify that the registry contains the pushed image and that you can pull it
 
 <details><summary>show</summary>
 <p>
-
-```bash
-:~$ curl http://$registry_ip:5000/v2/_catalog
-{"repositories":["simpleapp"]}
-
-# remove the image already present
-:~$ podman rmi $registry_ip:5000/simpleapp
-
-:~$ podman pull $registry_ip:5000/simpleapp
-Trying to pull 10.152.183.13:5000/simpleapp:latest...
-Getting image source signatures
-Copying blob 643ea8c2c185 skipped: already exists
-Copying blob 972107ece720 skipped: already exists
-Copying blob 9857eeea6120 skipped: already exists
-Copying blob 93859aa62dbd skipped: already exists
-Copying blob 8e47efbf2b7e skipped: already exists
-Copying blob 42e0f5a91e40 skipped: already exists
-Copying config ef4b14a72d done
-Writing manifest to image destination
-Storing signatures
-ef4b14a72d02ae0577eb0632d084c057777725c279e12ccf5b0c6e4ff5fd598b
-```
 
 </p>
 </details>
@@ -141,21 +120,6 @@ ef4b14a72d02ae0577eb0632d084c057777725c279e12ccf5b0c6e4ff5fd598b
 <details><summary>show</summary>
 <p>
 
-```bash
-:~$ podman create busybox # create
-Resolved "busybox" as an alias (/etc/containers/registries.conf.d/000-shortnames.conf)
-Trying to pull docker.io/library/busybox:latest...
-Getting image source signatures
-Copying blob sha256:213a27df5921cd9ae24732504c590bb6408911c20fb50a597f2a40896d554a8f
-Copying config sha256:3fba0c87fcc8ba126bf99e4ee205b43c91ffc6b15bb052315312e71bc6296551
-Writing manifest to image destination
-51b613406e8889213c176523e1c430e4bd00047965b0c22cff5b1c9badfbc452
-
-:~$ podman container ls -a
-CONTAINER ID  IMAGE                             COMMAND     CREATED        STATUS      PORTS       NAMES
-51b613406e88  docker.io/library/busybox:latest  sh          2 minutes ago  Created                 adoring_almeida
-```
-
 </p>
 </details>
 
@@ -164,17 +128,6 @@ CONTAINER ID  IMAGE                             COMMAND     CREATED        STATU
 <details><summary>show</summary>
 <p>
 
-```bash
-:~$ podman container ls -a # pick the container id
-CONTAINER ID  IMAGE                             COMMAND     CREATED        STATUS      PORTS       NAMES
-51b613406e88  docker.io/library/busybox:latest  sh          2 minutes ago  Created                 adoring_almeida
-
-:~$ podman export <container id> --output=output.tar
-
-:~$ ls -al output.tar
--rw-r--r--@ 1 limistah  wheel  4272640 28 Aug 13:48 output.tar
-```
-
 </p>
 </details>
 
@@ -182,13 +135,6 @@ CONTAINER ID  IMAGE                             COMMAND     CREATED        STATU
 
 <details><summary>show</summary>
 <p>
-
-```bash
-:~$ kubectl run simpleapp --image=$registry_ip:5000/simpleapp --port=80
-
-:~$ curl ${kubectl get pods simpleapp -o jsonpath='{.status.podIP}'}
-Hello, World!
-```
 
 </p>
 </details>
@@ -200,18 +146,6 @@ Hello, World!
 
 > Note: The two most used container registry servers with a free plan are [DockerHub](https://hub.docker.com/) and [Quay.io](https://quay.io/).
 
-```bash
-:~$ podman login --username $YOUR_USER --password $YOUR_PWD docker.io
-:~$ cat ${XDG_RUNTIME_DIR}/containers/auth.json
-{
-        "auths": {
-                "docker.io": {
-                        "auth": "Z2l1bGl0JLSGtvbkxCcX1xb617251xh0x3zaUd4QW45Q3JuV3RDOTc="
-                }
-        }
-}
-```
-
 </p>
 </details>
 
@@ -219,13 +153,6 @@ Hello, World!
 
 <details><summary>show</summary>
 <p>
-
-```bash
-:~$ kubectl create secret generic mysecret --from-file=.dockerconfigjson=${XDG_RUNTIME_DIR}/containers/auth.json --type=kubernetes.io/dockeconfigjson
-secret/mysecret created
-:~$ kubectl create secret docker-registry mysecret2 --docker-server=https://index.docker.io/v1/ --docker-username=$YOUR_USR --docker-password=$YOUR_PWD
-secret/mysecret2 created
-```
 
 </p>
 </details>
@@ -235,19 +162,6 @@ secret/mysecret2 created
 <details><summary>show</summary>
 <p>
 
-```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  name: private-reg
-spec:
-  containers:
-  - name: private-reg-container
-    image: $YOUR_PRIVATE_IMAGE
-  imagePullSecrets:
-  - name: mysecret
-```
-
 </p>
 </details>
 
@@ -255,12 +169,6 @@ spec:
 
 <details><summary>show</summary>
 <p>
-
-```bash
-:~$ podman rm --all --force
-:~$ podman rmi --all
-:~$ kubectl delete pod simpleapp
-```
 
 </p>
 </details>

@@ -54,24 +54,6 @@ k exec nginx -c busybox1 -it -- echo '/etc/foo/passwd'
 <details><summary>show</summary>
 <p>
 
-```yaml
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: myvolume
-  labels:
-    type: local
-spec:
-  storageClassName: normal
-  capacity:
-    storage: 10Gi
-  accessModes:
-    - ReadWriteOnce
-    - ReadWriteMany
-  hostPath:
-    path: "/etc/foo"
-```
-
 </p>
 </details>
 
@@ -80,20 +62,6 @@ spec:
 <details><summary>show</summary>
 <p>
 
-```yaml
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: mypvc
-spec:
-  storageClassName: normal
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 4Gi
-```
-
 </p>
 </details>
 
@@ -101,31 +69,6 @@ spec:
 
 <details><summary>show</summary>
 <p>
-
-```bash
-kubectl busybox --image=busybox --command /bin/sh -c "sleep 3600" --dry-run=client -oyaml > mybusybox.yaml
-vim mybusybox.yaml
-```
-
-```yaml
-  volumes:
-    - name: task-pv-storage
-      persistentVolumeClaim:
-        claimName: mypvc
-  containers:
-    - args:
-      - /bin/sh
-      - -c
-      - sleep 3600
-  ...
-      volumeMounts:
-        - mountPath: /etc/foo
-          name: task-pv-storage
-```
-
-```bash
-kubectl exec mybusybox -it -- cp /etc/passwd /etc/foo/passwd
-```
 
 </p>
 </details>
@@ -142,12 +85,6 @@ kubectl exec mybusybox -it -- cp /etc/passwd /etc/foo/passwd
 
 <details><summary>show</summary>
 <p>
-
-```bash
-kubectl run busybox --image=busybox --restart=Never -- sleep 3600
-kubectl cp busybox:/etc/passwd ./passwd
-cat passwd
-```
 
 </p>
 </details>

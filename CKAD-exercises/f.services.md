@@ -7,10 +7,6 @@
 <details><summary>show</summary>
 <p>
 
-```bash
-kubectl run nginx --image=nginx --restart=Never --port=80 --expose
-```
-
 </p>
 </details>
 
@@ -18,11 +14,6 @@ kubectl run nginx --image=nginx --restart=Never --port=80 --expose
 
 <details><summary>show</summary>
 <p>
-
-```bash
-kubectl get svc nginx
-kubectl get ep
-```
 
 </p>
 </details>
@@ -32,19 +23,9 @@ kubectl get ep
 <details><summary>show</summary>
 <p>
 
-```bash
-kubectl get svc
-kubectl run tmp --restart=Never --image=busybox --rm -it -- wget -O- <IP>
-```
-
 </p>
 or
 <p>
-
-```bash
-IP=$(kubectl get svc nginx --template={{.sepc.clusterIP}})
-kubectl run busybox --restart=Never --image=busybox -it --restart=Never --env="IP=$IP" -- wget -O- $IP:80 --timeout 2
-```
 
 </p>
 </details>
@@ -54,44 +35,6 @@ kubectl run busybox --restart=Never --image=busybox -it --restart=Never --env="I
 <details><summary>show</summary>
 <p>
 
-```bash
-kubectl edit svc nginx
-```
-
-```yaml
-apiVersion: v1
-kind: Service
-metadata:
-  creationTimestamp: 2018-06-25T07:55:16Z
-  name: nginx
-  namespace: default
-  resourceVersion: "93442"
-  selfLink: /api/v1/namespaces/default/services/nginx
-  uid: 191e3dac-784d-11e8-86b1-00155d9f663c
-spec:
-  clusterIP: 10.97.242.220
-  ports:
-    - port: 80
-      protocol: TCP
-      targetPort: 80
-  selector:
-    run: nginx
-  sessionAffinity: None
-  type: NodePort # change cluster IP to nodeport
-status:
-  loadBalancer: {}
-```
-
-or
-
-```bash
-kubectl patch svc nginx -p '{"spec": {"type":"NodePort"}}'
-```
-
-```bash
-wget -O- NODE_IP:31931
-```
-
 </p>
 </details>
 
@@ -99,10 +42,6 @@ wget -O- NODE_IP:31931
 
 <details><summary>show</summary>
 <p>
-
-```bash
-kubectl create deployment foo --image=dgkanatsios/simpleapp --replicas=3 --restart=Never -l app=foo --port=8080
-```
 
 </p>
 </details>
@@ -112,12 +51,6 @@ kubectl create deployment foo --image=dgkanatsios/simpleapp --replicas=3 --resta
 <details><summary>show</summary>
 <p>
 
-```bash
-kubectl get pod -o wide
-
-kubectl run tmp --restart=Never --image=busybox --rm --it -- wget -O- <IP>:8080
-```
-
 </p>
 </details>
 
@@ -126,12 +59,6 @@ kubectl run tmp --restart=Never --image=busybox --rm --it -- wget -O- <IP>:8080
 <details><summary>show</summary>
 <p>
 
-```bash
-kubectl expose deployment depl --port=6262 --target-port=8080
-
-kubectl get ep
-```
-
 </p>
 </details>
 
@@ -139,11 +66,6 @@ kubectl get ep
 
 <details><summary>show</summary>
 <p>
-
-```bash
-kubectl run tmp --restart=busybox --image=busybox --rm -it -- /bin/sh
-wget -O- foo:6262
-```
 
 </p>
 </details>
@@ -156,35 +78,6 @@ kubernetes.io > Documentation > Concepts > Services, Load Balancing, and Network
 
 <details><summary>show</summary>
 <p>
-
-```bash
-kubectl create deployment nginx --image=nginx --replicas=2 --port=80
-kubectl expose deployment nginx --port=80
-```
-
-```bash
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: test-network-policy
-spec:
-  podSelector:
-    matchLabels:
-      app: nginx
-  policyTypes:
-  - Ingress
-  ingress:
-  - from:
-    - podSelector:
-        matchLabels:
-          access: granted
-```
-
-```bash
-kubectl run busybox --image=busybox --rm -it --restart=Never -- wget -O- http://nginx:80 --timeout 2 # wont work
-kubectl run busybox --image=busybox --rm -it --restart=Never --labels=access=granted s-- wget -O- http://nginx:80 --timeout 2
-
-```
 
 </p>
 </details>

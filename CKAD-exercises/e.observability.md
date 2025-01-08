@@ -11,23 +11,6 @@ kubernetes.io > Documentation > Tasks > Configure Pods and Containers > [Configu
 <details><summary>show</summary>
 <p>
 
-```yaml
-containers:
-- name: nginx
-  image: nginx
-  ...
-  livenessProbe:
-    exec:
-      command:
-        - ls
-```
-
-```bash
-kubectl create -f pod.yaml
-kubectl describe pod nginx | grep -i liveness
-kubectl delete -f pod.yaml
-```
-
 </p>
 </details>
 
@@ -36,24 +19,6 @@ kubectl delete -f pod.yaml
 <details><summary>show</summary>
 <p>
 
-```yaml
-containers:
-- name: nginx
-  image: nginx
-  ...
-  livenessProbe:
-    exec:
-      command:
-        - ls
-    initialDelaySeconds: 5
-    periodSeconds: 5
-```
-
-```bash
-kubectl create -f pod.yaml
-kubectl describe pod pod1 | grep -i liveness
-kubectl delete pod pod1
-```
 
 </p>
 </details>
@@ -62,24 +27,6 @@ kubectl delete pod pod1
 
 <details><summary>show</summary>
 <p>
-
-```bash
-kubectl run nginx --image=nginx --port=80 --dry-run=client -o yaml > pod.yaml
-vi pod.yaml
-```
-
-```yaml
-containers:
-- name: nginx
-  image: nginx
-  ...
-  ports:
-  - containerPort: 80
-  livenessProbe:
-    httpGet:
-      path: /
-      port: 80
-```
 
 </p>
 </details>
@@ -99,10 +46,6 @@ containers:
 <details><summary>show</summary>
 <p>
 
-```bash
-kubectl run tmp --image=busybox --restart=Never -- /bin/sh -c 'i=0; while true; do echo "$i: $(date)"; i=$((i+1)); sleep 1; done'
-```
-
 </p>
 </details>
 
@@ -113,9 +56,6 @@ kubectl run tmp --image=busybox --restart=Never -- /bin/sh -c 'i=0; while true; 
 <details><summary>show</summary>
 <p>
 
-```bash
-kubectl run tmp --image=busybox --restart=Never -- /bin/sh -c 'ls /notexist'
-```
 
 </p>
 </details>
@@ -124,10 +64,6 @@ kubectl run tmp --image=busybox --restart=Never -- /bin/sh -c 'ls /notexist'
 
 <details><summary>show</summary>
 <p>
-
-```bash
-kubectl run tmp --image=busybox --restart=Never -- /bin/sh -c 'notexist'
-```
 
 </p>
 </details>

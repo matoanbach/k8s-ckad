@@ -7,31 +7,7 @@
 <details><summary>show</summary>
 <p>
 
-```bash
-containers:
-  - args:
-    - /bin/sh
-    - -c
-    - echo hello;sleep 3600
-    image: busybox
-    imagePullPolicy: IfNotPresent
-    name: busybox
-    resources: {}
-  - args:
-    - /bin/sh
-    - -c
-    - echo hello;sleep 3600
-    image: busybox
-    name: busybox2
-```
 
-```bash
-kubectl create -f pod.yaml
-kubectl exec -it busybox -c busybox2 -- /bin/sh
-ls
-exit
-kubectl delete po busybox
-```
 
 </p>
 </details>
@@ -40,38 +16,6 @@ kubectl delete po busybox
 
 <details><summary>show</summary>
 <p>
-
-```bash
-containers:
-  image: busybox
-  imagePullPolicy: IfNotPresent
-  name: busybox
-  resources: {}
-  ports:
-  - containerPort: 80
-  volumeMounts:
-    - name: work-volume
-      mountPath: /usr/share/nginx/html
-initContainers:
-  - name: busybox2
-    image: busybox
-    command: 
-    - "/bin/sh"
-    - -c
-    - "echo "Test" > /work-dir/index.html"
-    volumeMounts:
-    - name: work-volume
-      mountPath: /work-dir
-volumes:
-- name: work-volume
-  emptyDir: {}
-```
-
-```bash
-kubectl get pod pod1 -owide
-kubectl run tmp --restart=Never --rm --image=busybox -- wget -O- <IP>
-```
-
 
 </p>
 </details>
