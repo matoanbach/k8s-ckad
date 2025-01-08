@@ -11,6 +11,8 @@ kubernetes.io > Documentation > Tasks > Configure Pods and Containers > [Configu
 <details><summary>show</summary>
 <p>
 
+
+
 </p>
 </details>
 
