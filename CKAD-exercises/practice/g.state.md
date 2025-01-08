@@ -15,35 +15,49 @@ kubernetes.io > Documentation > Tasks > Configure Pods and Containers > [Configu
 
 _This question is probably a better fit for the 'Multi-container-pods' section but I'm keeping it here as it will help you get acquainted with state_
 
+```bash
+k run multipod --image=busybox  --dry-run=client -oyaml --command -- /bin/sh -c 'sleep 3600' > multipod.yaml
+```
+
 ```yaml
 apiVersion: v1
 kind: Pod
 metadata:
-  name: nginx
+  creationTimestamp: null
+  labels:
+    run: multipod
+  name: multipod
 spec:
   containers:
-    - name: busybox1
+    - command:
+        - /bin/sh
+        - -c
+        - sleep 3600
       image: busybox
+      name: busybox1
+      resources: {}
+
       volumeMounts:
-        - name: volume-mount
+        - name: data-vol
           mountPath: /etc/foo
-      command: ["sleep", "3600"]
-    - name: busybox2
+
+    - command:
+        - /bin/sh
+        - -c
+        - sleep 3600
       image: busybox
+      name: busybox2
+      resources: {}
       volumeMounts:
-        - name: volume-mount
+        - name: data-vol
           mountPath: /etc/foo
-      command: ["sleep", "3600"]
+
   volumes:
-    - name: volume-mount
+    - name: data-vol
       emptyDir: {}
-```
-
-```bash
-k exec nginx -c busybox2 -it -- cat /etc/passwd > '/etc/foo/passwd'
-
-k exec nginx -c busybox1 -it -- echo '/etc/foo/passwd'
-
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}
 ```
 
 </p>
@@ -54,6 +68,32 @@ k exec nginx -c busybox1 -it -- echo '/etc/foo/passwd'
 <details><summary>show</summary>
 <p>
 
+```bash
+vim pv.yaml
+```
+
+```yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: myvolume
+  labels:
+    type: local
+spec:
+  storageClassName: normal
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+    - ReadWriteMany
+  hostPath:
+    path: "etc/foo"
+```
+
+```bash
+k get pv
+```
+
 </p>
 </details>
 
@@ -61,6 +101,24 @@ k exec nginx -c busybox1 -it -- echo '/etc/foo/passwd'
 
 <details><summary>show</summary>
 <p>
+
+```bash
+vim pvc.yaml
+```
+
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mypvc
+spec:
+  storageClassName: normal
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 4Gi
+```
 
 </p>
 </details>
@@ -70,6 +128,49 @@ k exec nginx -c busybox1 -it -- echo '/etc/foo/passwd'
 <details><summary>show</summary>
 <p>
 
+```bash
+k run busybox --image=busybox --restart=Never --dry-run=client -oyaml --command -- /bin/sh -c 'sleep 3600' > pod.yaml
+vim pod.yaml
+```
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: busybox
+  name: busybox
+spec:
+  containers:
+    - args:
+        - /bin/sh
+        - -c
+        - sleep 3600
+      image: busybox
+      imagePullPolicy: IfNotPresent
+      name: busybox
+      resources: {}
+      volumeMounts: #
+        - name: myvolume #
+          mountPath: /etc/foo #
+  dnsPolicy: ClusterFirst
+  restartPolicy: Never
+  volumes: #
+    - name: myvolume #
+      persistentVolumeClaim: #
+        claimName: mypvc #
+status: {}
+```
+
+```bash
+kubectl create -f pod.yaml
+```
+
+```bash
+kubectl exec busybox -it -- cp /etc/passwd /etc/foo/passwd
+```
+
 </p>
 </details>
 
@@ -77,6 +178,36 @@ k exec nginx -c busybox1 -it -- echo '/etc/foo/passwd'
 
 <details><summary>show</summary>
 <p>
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: busybox
+  name: busybox2
+spec:
+  containers:
+    - args:
+        - /bin/sh
+        - -c
+        - sleep 3600
+      image: busybox
+      imagePullPolicy: IfNotPresent
+      name: busybox
+      resources: {}
+      volumeMounts: #
+        - name: myvolume #
+          mountPath: /etc/foo #
+  dnsPolicy: ClusterFirst
+  restartPolicy: Never
+  volumes: #
+    - name: myvolume #
+      persistentVolumeClaim: #
+        claimName: mypvc #
+status: {}
+```
 
 </p>
 </details>
@@ -86,5 +217,10 @@ k exec nginx -c busybox1 -it -- echo '/etc/foo/passwd'
 <details><summary>show</summary>
 <p>
 
+```bash
+kubectl run busybox --image=busybox --restart=Never -- sleep 3600
+kubectl cp busybox:/etc/password ./passwd
+cat passwd
+```
 </p>
 </details>
