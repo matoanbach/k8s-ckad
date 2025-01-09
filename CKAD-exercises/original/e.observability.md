@@ -11,6 +11,41 @@ kubernetes.io > Documentation > Tasks > Configure Pods and Containers > [Configu
 <details><summary>show</summary>
 <p>
 
+```bash
+k run nginx --image=nginx --restart=Never --dry-run=client -oyaml --command -- ls > nginx.yaml
+vim nginx.yaml
+```
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: nginx
+  name: nginx
+spec:
+  containers:
+    - image: nginx
+      name: nginx
+      resources: {}
+      livenessProbe:
+        exec:
+          command:
+            - ls
+  dnsPolicy: ClusterFirst
+  restartPolicy: Never
+status: {}
+```
+
+```bash
+k get po
+# output
+NAME              READY   STATUS    RESTARTS   AGE
+nginx             1/1     Running   0          29s
+simple-webapp-1   1/1     Running   0          2m13s
+```
+
 </p>
 </details>
 
@@ -19,6 +54,35 @@ kubernetes.io > Documentation > Tasks > Configure Pods and Containers > [Configu
 <details><summary>show</summary>
 <p>
 
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: nginx
+  name: nginx
+spec:
+  containers:
+    - image: nginx
+      name: nginx
+      resources: {}
+      livenessProbe:
+        exec:
+          command:
+            - ls
+        initialDelaySeconds: 5
+        periodSeconds: 5
+  dnsPolicy: ClusterFirst
+  restartPolicy: Never
+status: {}
+```
+
+```bash
+k describe pod/nginx | grep -i liveness
+# output
+    Liveness:       exec [ls] delay=5s timeout=1s period=5s #success=1 #failure=3
+```
 
 </p>
 </details>
@@ -28,6 +92,31 @@ kubernetes.io > Documentation > Tasks > Configure Pods and Containers > [Configu
 <details><summary>show</summary>
 <p>
 
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: nginx
+  name: nginx
+spec:
+  containers:
+    - image: nginx
+      imagePullPolicy: IfNotPresent
+      name: nginx
+      resources: {}
+      ports:
+        - containerPort: 80 # Note: Readiness probes runs on the container during its whole lifecycle. Since nginx exposes 80, containerPort: 80 is not required for readiness to work.
+      readinessProbe: # declare the readiness probe
+        httpGet: # add this line
+          path: / #
+          port: 80 #
+  dnsPolicy: ClusterFirst
+  restartPolicy: Never
+status: {}
+```
+
 </p>
 </details>
 
@@ -35,6 +124,30 @@ kubernetes.io > Documentation > Tasks > Configure Pods and Containers > [Configu
 
 <details><summary>show</summary>
 <p>
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: nginx
+  name: nginx
+spec:
+  containers:
+    - image: nginx
+      name: nginx
+      resources: {}
+      readinessProbe:
+        exec:
+          command:
+            - ls
+        initialDelaySeconds: 5
+        periodSeconds: 5
+  dnsPolicy: ClusterFirst
+  restartPolicy: Never
+status: {}
+```
 
 </p>
 </details>
@@ -46,6 +159,25 @@ kubernetes.io > Documentation > Tasks > Configure Pods and Containers > [Configu
 <details><summary>show</summary>
 <p>
 
+```bash
+k run busybox --image=busybox --restart=Never --command -- sh -c 'i=0; while true; do echo "$i: $(date)"; i=$((i+1)); sleep 1; done'
+```
+
+```bash
+k logs busybox  -f
+# output
+0: Thu Jan  9 18:58:37 UTC 2025
+1: Thu Jan  9 18:58:38 UTC 2025
+2: Thu Jan  9 18:58:39 UTC 2025
+3: Thu Jan  9 18:58:40 UTC 2025
+4: Thu Jan  9 18:58:41 UTC 2025
+5: Thu Jan  9 18:58:42 UTC 2025
+6: Thu Jan  9 18:58:43 UTC 2025
+7: Thu Jan  9 18:58:44 UTC 2025
+8: Thu Jan  9 18:58:45 UTC 2025
+9: Thu Jan  9 18:58:46 UTC 2025
+```
+
 </p>
 </details>
 
@@ -56,6 +188,15 @@ kubernetes.io > Documentation > Tasks > Configure Pods and Containers > [Configu
 <details><summary>show</summary>
 <p>
 
+```bash
+k run busybox --image=busybox --restart=Never -- /bin/sh -c 'ls /notexist'
+```
+
+```bash
+k logs busybox
+# output
+ls: /notexist: No such file or directory
+```
 
 </p>
 </details>
@@ -65,6 +206,20 @@ kubernetes.io > Documentation > Tasks > Configure Pods and Containers > [Configu
 <details><summary>show</summary>
 <p>
 
+```bash
+k run busybox --image=busybox --restart=Never -- /bin/sh -c 'notexist'
+```
+
+```bash
+k logs busybox
+# output
+/bin/sh: notexist: not found
+```
+
+```bash
+k get error
+```
+
 </p>
 </details>
 
@@ -72,6 +227,10 @@ kubernetes.io > Documentation > Tasks > Configure Pods and Containers > [Configu
 
 <details><summary>show</summary>
 <p>
+
+```bash
+k top nodes
+```
 
 </p>
 </details>
