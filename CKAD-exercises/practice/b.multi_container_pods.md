@@ -7,43 +7,7 @@
 <details><summary>show</summary>
 <p>
 
-```bash
-k run multipod --image=busybox --restart=Never --dry-run=client -oyaml --command -- /bin/sh -c 'echo "hello"; sleep 3600' > multipod.yaml
-vim multipod.yaml
-```
 
-```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  creationTimestamp: null
-  labels:
-    run: multipod
-  name: multipod
-spec:
-  containers:
-    - command:
-        - /bin/sh
-        - -c
-        - echo "hello"; sleep 3600
-      image: busybox
-      name: container1
-      resources: {}
-
-    - command:
-        - /bin/sh
-        - -c
-        - echo "hello"; sleep 3600
-      image: busybox
-      name: container2
-      resources: {}
-  dnsPolicy: ClusterFirst
-  restartPolicy: Never
-```
-
-```bash
-k exec multipod -c container2 -it -- ls
-```
 
 </p>
 </details>
@@ -52,52 +16,6 @@ k exec multipod -c container2 -it -- ls
 
 <details><summary>show</summary>
 <p>
-
-```bash
-k run nginx --image=nginx --port=80 --restart=Never --dry-run=client -oyaml > init.yaml
-vim init.yaml
-```
-
-```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  creationTimestamp: null
-  labels:
-    run: nginx
-  name: nginx
-spec:
-  initContainers:
-    - image: busybox
-      name: init-con
-      command:
-        - sh
-        - -c
-        - 'echo "Test" > /work-dir/index.html'
-      volumeMounts:
-        - name: data-mount
-          mountPath: /work-dir
-  containers:
-    - image: nginx
-      name: nginx
-      ports:
-        - containerPort: 80
-      resources: {}
-      volumeMounts:
-        - name: data-mount
-          mountPath: /usr/share/nginx/html
-  volumes:
-    - name: data-mount
-      emptyDir: {}
-  dnsPolicy: ClusterFirst
-  restartPolicy: Never
-status: {}
-```
-
-```bash
-k get po -owide
-k run tmp --restart=Never --image=nginx:alpine --rm -it -- wget -O- 10.42.0.30
-```
 
 </p>
 </details>

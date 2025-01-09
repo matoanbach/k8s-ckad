@@ -11,39 +11,6 @@ kubernetes.io > Documentation > Tasks > Configure Pods and Containers > [Configu
 <details><summary>show</summary>
 <p>
 
-```bash
-k run nginx --image=nginx --restart=Never --dry-run=client -oyaml > nginx.yaml
-vim nginx.yaml
-```
-
-```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  creationTimestamp: null
-  labels:
-    run: nginx
-  name: nginx
-spec:
-  containers:
-    - image: nginx
-      name: nginx
-      resources: {}
-      livenessProbe:
-        exec:
-          command:
-            - ls
-  dnsPolicy: ClusterFirst
-  restartPolicy: Never
-status: {}
-```
-
-```bash
-kubectl create -f pod.yaml
-kubectl describe pod nginx | grep -i liveness # run this to see that liveness probe works
-kubectl delete -f pod.yaml
-```
-
 </p>
 </details>
 
@@ -52,28 +19,6 @@ kubectl delete -f pod.yaml
 <details><summary>show</summary>
 <p>
 
-```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  creationTimestamp: null
-  labels:
-    run: nginx
-  name: nginx
-spec:
-  containers:
-    - image: nginx
-      name: nginx
-      resources: {}
-      livenessProbe:
-        exec:
-          command:
-            - ls
-
-  dnsPolicy: ClusterFirst
-  restartPolicy: Never
-status: {}
-```
 
 </p>
 </details>
@@ -83,34 +28,6 @@ status: {}
 <details><summary>show</summary>
 <p>
 
-```bash
-k run nginx --image=nginx --port=80 --dry-run=client -oyaml > nginx.yaml
-```
-
-```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  creationTimestamp: null
-  labels:
-    run: nginx
-  name: nginx
-spec:
-  containers:
-    - image: nginx
-      name: nginx
-      ports:
-        - containerPort: 80
-      resources: {}
-      readinessProbe:
-        httpGet:
-          port: 80
-          path: /
-  dnsPolicy: ClusterFirst
-  restartPolicy: Always
-status: {}
-```
-
 </p>
 </details>
 
@@ -118,12 +35,6 @@ status: {}
 
 <details><summary>show</summary>
 <p>
-
-```bash
-I have no idea:
-
-k get events -o json | jq -r '.items[] | select(.message | contains("Liveness probe failed")).involvedObject | .namespace + "/" + .name'
-```
 
 </p>
 </details>
@@ -145,14 +56,6 @@ k get events -o json | jq -r '.items[] | select(.message | contains("Liveness pr
 <details><summary>show</summary>
 <p>
 
-```bash
-k run busybox --image=busybox --restart=Never --command -- /bin/sh -c 'ls /notexist'
-```
-
-```bash
-k logs busybox
-ls: /notexist: No such file or directory
-```
 
 </p>
 </details>
@@ -162,15 +65,6 @@ ls: /notexist: No such file or directory
 <details><summary>show</summary>
 <p>
 
-```bash
-kubectl run busybox --restart=Never --image=busybox -- notexist
-kubectl logs busybox # will bring nothing! container never started
-kubectl describe po busybox # in the events section, you'll see the error
-# also...
-kubectl get events | grep -i error # you'll see the error here as well
-kubectl delete po busybox --force --grace-period=0
-```
-
 </p>
 </details>
 
@@ -178,15 +72,6 @@ kubectl delete po busybox --force --grace-period=0
 
 <details><summary>show</summary>
 <p>
-
-```bash
-k top nodes
-```
-
-```txt
-NAME           CPU(cores)   CPU%   MEMORY(bytes)   MEMORY%
-controlplane   54m          0%     1087Mi          1%
-```
 
 </p>
 </details>

@@ -25,14 +25,6 @@ kubernetes.io > Documentation > Tasks > Configure Pods and Containers > [Configu
 <details><summary>show</summary>
 <p>
 
-```bash
-k create cm config --from-literal=foo=lala --from-literal=foo2=lolo
-
-k get cm config
-
-k describe cm config
-```
-
 </p>
 </details>
 
@@ -40,10 +32,6 @@ k describe cm config
 
 <details><summary>show</summary>
 <p>
-
-```bash
-k describe cm config
-```
 
 </p>
 </details>
@@ -59,10 +47,6 @@ echo -e "foo3=lili\nfoo4=lele" > config.txt
 <details><summary>show</summary>
 <p>
 
-```bash
-k create cm config --from-file=config.txt
-```
-
 </p>
 </details>
 
@@ -77,9 +61,6 @@ echo -e "var1=val1\n# this is a comment\n\nvar2=val2\n#anothercomment" > config.
 <details><summary>show</summary>
 <p>
 
-```bash
-k create cm-env --from-env-file=config.env
-```
 
 </p>
 </details>
@@ -95,9 +76,6 @@ echo -e "var3=val3\nvar4=val4" > config4.txt
 <details><summary>show</summary>
 <p>
 
-```bash
-k create cm cm-special --from-file=special=config4.txt
-```
 
 </p>
 </details>
@@ -107,69 +85,6 @@ k create cm cm-special --from-file=special=config4.txt
 <details><summary>show</summary>
 <p>
 
-```bash
-k create cm options --from-literal=var5=val5
-```
-
-```bash
-k run nginx --image=nginx --dry-run=client -oyaml > options.yaml
-```
-
-```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  creationTimestamp: null
-  labels:
-    run: nginx
-  name: nginx
-spec:
-  containers:
-    - image: nginx
-      name: nginx
-      resources: {}
-      env:
-        - name: option
-          valueFrom:
-            configMapKeyRef:
-              name: options
-              key: var5
-  dnsPolicy: ClusterFirst
-  restartPolicy: Always
-status: {}
-```
-
-```bash
-k exec nginx -it  -- /bin/sh
-# env
-    WEBAPP_COLOR_SERVICE_PORT_8080_TCP_ADDR=10.43.14.77
-    WEBAPP_COLOR_SERVICE_SERVICE_HOST=10.43.14.77
-    KUBERNETES_SERVICE_PORT=443
-    KUBERNETES_PORT=tcp://10.43.0.1:443
-    WEBAPP_COLOR_SERVICE_PORT_8080_TCP_PORT=8080
-    HOSTNAME=nginx
-    WEBAPP_COLOR_SERVICE_PORT_8080_TCP_PROTO=tcp
-    HOME=/root
-    WEBAPP_COLOR_SERVICE_PORT=tcp://10.43.14.77:8080
-    WEBAPP_COLOR_SERVICE_SERVICE_PORT=8080
-    PKG_RELEASE=1~bookworm
-    DYNPKG_RELEASE=1~bookworm
-    WEBAPP_COLOR_SERVICE_PORT_8080_TCP=tcp://10.43.14.77:8080
-    TERM=xterm
-    NGINX_VERSION=1.27.3
-    KUBERNETES_PORT_443_TCP_ADDR=10.43.0.1
-    PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-    NJS_VERSION=0.8.7
-    KUBERNETES_PORT_443_TCP_PORT=443
-    option=val5
-    KUBERNETES_PORT_443_TCP_PROTO=tcp
-    NJS_RELEASE=1~bookworm
-    KUBERNETES_SERVICE_PORT_HTTPS=443
-    KUBERNETES_PORT_443_TCP=tcp://10.43.0.1:443
-    KUBERNETES_SERVICE_HOST=10.43.0.1
-    PWD=/
-    # exit
-```
 
 </p>
 </details>
@@ -179,35 +94,6 @@ k exec nginx -it  -- /bin/sh
 <details><summary>show</summary>
 <p>
 
-```bash
-k create cm anotherone --from-literal=var6=val6 --from-literal=var7=val7
-```
-
-```bash
-k run nginx --image=nginx --restart=Never --dry-run=client -oyaml > nginx.yaml
-```
-
-```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  creationTimestamp: null
-  labels:
-    run: nginx
-  name: nginx
-spec:
-  containers:
-    - image: nginx
-      name: nginx
-      resources: {}
-      envFrom:
-        - configMapRef:
-            name: anotherone
-  dnsPolicy: ClusterFirst
-  restartPolicy: Never
-status: {}
-```
-
 </p>
 </details>
 
@@ -215,48 +101,6 @@ status: {}
 
 <details><summary>show</summary>
 <p>
-
-```bash
-k create cm cmvolume --from-literal=var8=val8 --from-literal=var9=val9
-```
-
-```bash
-k run nginx --image=nginx --dry-ru=client -oyaml > nginx.yaml
-```
-
-```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  creationTimestamp: null
-  labels:
-    run: nginx
-  name: nginx
-spec:
-  containers:
-    - image: nginx
-      name: nginx
-      resources: {}
-      volumeMounts:
-        - name: config
-          mountPath: /etc/lala
-  volumes:
-    - name: config
-      configMap:
-        name: cmvolume
-  dnsPolicy: ClusterFirst
-  restartPolicy: Never
-status: {}
-```
-
-```bash
-controlplane ~ ➜  k exec nginx -it -- sh
-    >_ cd /etc/lala
-    >_ ls
-        var8  var9
-    >_ cat var8
-        val8
-```
 
 </p>
 </details>
@@ -270,31 +114,6 @@ kubernetes.io > Documentation > Tasks > Configure Pods and Containers > [Configu
 <details><summary>show</summary>
 <p>
 
-```bash
-k run nginx --image=nginx --restart=Never --dry-run=client -oyaml > 101.yaml
-vim 101.yaml
-```
-
-```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  creationTimestamp: null
-  labels:
-    run: nginx
-  name: nginx
-spec:
-  containers:
-    - image: nginx
-      name: nginx
-      resources: {}
-      securityContext:
-        runAsUser: 101
-  dnsPolicy: ClusterFirst
-  restartPolicy: Never
-status: {}
-```
-
 </p>
 </details>
 
@@ -302,33 +121,6 @@ status: {}
 
 <details><summary>show</summary>
 <p>
-
-```bash
-k run nginx --image=nginx --restart=Never --dry-run=client -oyaml > 101.yaml
-vim NET_ADMIN.yaml
-```
-
-```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  creationTimestamp: null
-  labels:
-    run: nginx
-  name: nginx
-spec:
-  containers:
-    - image: nginx
-      name: nginx
-      resources: {}
-      securityContext:
-        runAsUser: 101
-        capabilities:
-          add: ["NET_ADMIN", "SYS_TIME"]
-  dnsPolicy: ClusterFirst
-  restartPolicy: Never
-status: {}
-```
 
 </p>
 </details>
@@ -342,34 +134,6 @@ kubernetes.io > Documentation > Tasks > Configure Pods and Containers > [Assign 
 <details><summary>show</summary>
 <p>
 
-```bash
-k run nginx --image=nginx --dry-run=client -oyaml > nginx.yaml
-```
-
-```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  creationTimestamp: null
-  labels:
-    run: nginx
-  name: nginx
-spec:
-  containers:
-    - image: nginx
-      name: nginx
-      resources:
-        requests:
-          cpu: 100m
-          memory: 256Mi
-        limits:
-          cpu: 200m
-          memory: 512Mi
-  dnsPolicy: ClusterFirst
-  restartPolicy: Always
-status: {}
-```
-
 </p>
 </details>
 
@@ -382,29 +146,6 @@ kubernetes.io > Documentation > Concepts > Policies > Limit Ranges (https://kube
 <details><summary>show</summary>
 <p>
 
-```bash
-k create ns limitrange
-```
-
-```yaml
-apiVersion: v1
-kind: LimitRange
-metadata:
-  name: lm
-  namespace: limitrange
-spec:
-  limits:
-    - max: # max and min define the limit range
-        memory: 500Mi
-      min:
-        memory: 100Mi
-      type: Pod
-```
-
-```bash
-k create -f lm.yaml
-```
-
 </p>
 </details>
 
@@ -413,10 +154,6 @@ k create -f lm.yaml
 <details><summary>show</summary>
 <p>
 
-```bash
-k describe limitranges lm -n limitrange
-```
-
 </p>
 </details>
 
@@ -424,38 +161,6 @@ k describe limitranges lm -n limitrange
 
 <details><summary>show</summary>
 <p>
-
-```bash
-k run nginx --image=nginx --dry-run=client -oyaml > nginx.yaml
-```
-
-```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  creationTimestamp: null
-  labels:
-    run: nginx
-  name: nginx
-  namespace: limitrange
-spec:
-  containers:
-    - image: nginx
-      name: nginx
-      resources:
-        requests:
-          memory: 250Mi
-        limits:
-          memory: 500Mi # max and min define the limit range
-  dnsPolicy: ClusterFirst
-  restartPolicy: Always
-status: {}
-```
-
-```bash
-k create -f nginx.yaml
-    Error from server (Forbidden): error when creating "nginx.yaml": pods "nginx" is forbidden: maximum memory usage per Pod is 500Mi.  No limit is specified
-```
 
 </p>
 </details>
@@ -469,30 +174,6 @@ kubernetes.io > Documentation > Concepts > Policies > Resource Quotas (https://k
 <details><summary>show</summary>
 <p>
 
-```bash
-k create quota myquota --hard=requests.cpu=1,requests.memory=1Gi,limits.cpu=2,limits.memory=2Gi -n one
-```
-
-```yaml
-apiVersion: v1
-kind: ResourceQuota
-metadata:
-  creationTimestamp: null
-  name: myquota
-  namespace: one
-spec:
-  hard:
-    limits.cpu: "2"
-    limits.memory: 2Gi
-    requests.cpu: "1"
-    requests.memory: 1Gi
-status: {}
-```
-
-```bash
-k get quota myquota
-```
-
 </p>
 </details>
 
@@ -501,35 +182,6 @@ k get quota myquota
 <details><summary>show</summary>
 <p>
 
-```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  creationTimestamp: null
-  labels:
-    run: nginx
-  name: nginx
-spec:
-  containers:
-    - image: nginx
-      name: nginx
-      resources:
-        requests:
-          cpu: "2"
-          memory: "3Gi"
-        limits:
-          cpu: "3"
-          memory: "4Gi"
-  dnsPolicy: ClusterFirst
-  restartPolicy: Always
-status: {}
-```
-
-```bash
-k run nginx --image=nginx --dry-run=client -oyaml > nginx.yaml
-    Error from server (Forbidden): error when creating "nginx.yaml": pods "nginx" is forbidden: exceeded quota: myquota, requested: limits.cpu=3,limits.memory=4Gi,requests.cpu=2,requests.memory=3Gi, used: limits.cpu=0,limits.memory=0,requests.cpu=0,requests.memory=0, limited: limits.cpu=2,limits.memory=2Gi,requests.cpu=1,requests.memory=1Gi
-```
-
 </p>
 </details>
 
@@ -537,36 +189,6 @@ k run nginx --image=nginx --dry-run=client -oyaml > nginx.yaml
 
 <details><summary>show</summary>
 <p>
-
-```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  creationTimestamp: null
-  labels:
-    run: nginx
-  name: nginx
-spec:
-  containers:
-    - image: nginx
-      name: nginx
-      resources:
-        requests:
-          cpu: "0.5"
-          memory: "1Gi"
-        limits:
-          cpu: "1"
-          memory: "2Gi"
-  dnsPolicy: ClusterFirst
-  restartPolicy: Always
-status: {}
-```
-
-```bash
-k get po
-    NAME    READY   STATUS    RESTARTS   AGE
-    nginx   1/1     Running   0          46s
-```
 
 </p>
 </details>
@@ -582,10 +204,6 @@ kubernetes.io > Documentation > Tasks > Inject Data Into Applications > [Distrib
 <details><summary>show</summary>
 <p>
 
-```bash
-k create secret generic mysecret --from-literal=password=mypass
-```
-
 </p>
 </details>
 
@@ -600,10 +218,6 @@ echo -n admin > username
 <details><summary>show</summary>
 <p>
 
-```bash
-k create secret generic mysecret2 --from-file=username
-```
-
 </p>
 </details>
 
@@ -611,28 +225,6 @@ k create secret generic mysecret2 --from-file=username
 
 <details><summary>show</summary>
 <p>
-
-```bash
-k get secrets mysecret2 -oyaml
->_
-apiVersion: v1
-data:
-  username: YWRtaW4=
-kind: Secret
-metadata:
-  creationTimestamp: "2025-01-08T18:31:03Z"
-  name: mysecret2
-  namespace: one
-  resourceVersion: "1347"
-  uid: d38dda46-4033-4129-8575-e7683571e857
-type: Opaque
-```
-
-```bash
-echo YWRtaW4= | base64 -d
->_
-admin
-```
 
 </p>
 </details>
@@ -642,48 +234,6 @@ admin
 <details><summary>show</summary>
 <p>
 
-```bash
-k run nginx --image=nginx --dry-run=client -oyaml > mypod.yaml
-```
-
-```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  creationTimestamp: null
-  labels:
-    run: nginx
-  name: nginx
-spec:
-  containers:
-    - image: nginx
-      name: nginx
-      resources: {}
-      volumeMounts:
-        - name: mysecret2-vol
-          mountPath: /etc/foo
-  volumes:
-    - name: mysecret2-vol
-      secret:
-        secretName: mysecret2
-  dnsPolicy: ClusterFirst
-  restartPolicy: Always
-status: {}
-```
-
-```bash
-k exec nginx -it -- sh
->_ env
-k exec nginx -it -- sh
-# ls /etc/foo
-username
-# cd /etc/foo
-# ls
-username
-# cat username
-admin
-```
-
 </p>
 </details>
 
@@ -691,35 +241,6 @@ admin
 
 <details><summary>show</summary>
 <p>
-
-```bash
-k delete --force pod nginx
-```
-
-```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  creationTimestamp: null
-  labels:
-    run: nginx
-  name: nginx
-spec:
-  containers:
-    - image: nginx
-      name: nginx
-      resources: {}
-      env:
-        - name: USERNAME
-          valueFrom:
-            secretKeyRef:
-              name: mysecret2
-              key: username
-
-  dnsPolicy: ClusterFirst
-  restartPolicy: Always
-status: {}
-```
 
 </p>
 </details>
@@ -729,10 +250,6 @@ status: {}
 <details><summary>show</summary>
 <p>
 
-```bash
-k create secret generic ext-service-secret -n secret-ops --from-literal=API_KEY=LmLHbYhsgWZwNifiqaRorH8T
-```
-
 </p>
 </details>
 
@@ -740,56 +257,6 @@ k create secret generic ext-service-secret -n secret-ops --from-literal=API_KEY=
 
 <details><summary>show</summary>
 <p>
-
-```bash
-k run consumer --image=nginx -n secret-ops --dry-run=client -oyaml > consumer.yaml
-vim consumer.yaml
-```
-
-```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  creationTimestamp: null
-  labels:
-    run: consumer
-  name: consumer
-  namespace: secret-ops
-spec:
-  containers:
-    - image: nginx
-      name: consumer
-      resources: {}
-      envFrom:
-        - secretRef:
-            name: ext-service-secret
-  dnsPolicy: ClusterFirst
-  restartPolicy: Always
-status: {}
-```
-
-```bash
-k exec consumer -it -- sh
->_ env
-    KUBERNETES_SERVICE_PORT=443
-    KUBERNETES_PORT=tcp://10.43.0.1:443
-    HOSTNAME=consumer
-    HOME=/root
-    PKG_RELEASE=1~bookworm
-    DYNPKG_RELEASE=1~bookworm
-    TERM=xterm
-    NGINX_VERSION=1.27.3
-    KUBERNETES_PORT_443_TCP_ADDR=10.43.0.1
-    PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-    NJS_VERSION=0.8.7
-    KUBERNETES_PORT_443_TCP_PORT=443
-    KUBERNETES_PORT_443_TCP_PROTO=tcp
-    NJS_RELEASE=1~bookworm
-    API_KEY=LmLHbYhsgWZwNifiqaRorH8T
-    KUBERNETES_SERVICE_PORT_HTTPS=443
-    KUBERNETES_PORT_443_TCP=tcp://10.43.0.1:443
-    KUBERNETES_SERVICE_HOST=10.43.0.1
-```
 
 </p>
 </details>
@@ -799,26 +266,6 @@ k exec consumer -it -- sh
 <details><summary>show</summary>
 <p>
 
-```bash
-k create secret generic my-secret --type=kubernetes.io/ssh-auth --from-file=ssh-privatekey=id_rsa --dry-run=client -oyaml > sc.yaml
-vim sc.yaml
-```
-
-```yaml
-apiVersion: v1
-data:
-  ssh-privatekey: ""
-kind: Secret
-metadata:
-  creationTimestamp: null
-  name: my-scret
-type: kubernetes.io/ssh-auth
-```
-
-```bash
-k create -f sc.yaml
-```
-
 </p>
 </details>
 
@@ -826,46 +273,6 @@ k create -f sc.yaml
 
 <details><summary>show</summary>
 <p>
-
-```bash
-k run consumer --image=nginx -n secret-ops --dry-run=client -oyaml > consumer.yaml
-vim consumer.yaml
-```
-
-```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  creationTimestamp: null
-  labels:
-    run: consumer
-  name: consumer
-  namespace: secret-ops
-spec:
-  containers:
-    - image: nginx
-      name: consumer
-      resources: {}
-      volumeMounts:
-        - name: secret-volume
-          mountPath: /var/app
-  volumes:
-    - name: secret-volume
-      secret:
-        secretName: my-secret
-  dnsPolicy: ClusterFirst
-  restartPolicy: Always
-status: {}
-```
-
-```bash
-k exec consumer -it -- sh
-# cd /var/app
-# ls
-ssh-privatekey
-# cat ssh-privatekey
-so8y12hp9edmih1123w1ds1d
-```
 
 </p>
 </details>
@@ -879,11 +286,6 @@ kubernetes.io > Documentation > Tasks > Configure Pods and Containers > [Configu
 <details><summary>show</summary>
 <p>
 
-```bash
-k get sa -A
-k get sa --all-namespaces
-```
-
 </p>
 </details>
 
@@ -891,10 +293,6 @@ k get sa --all-namespaces
 
 <details><summary>show</summary>
 <p>
-
-```bash
-k create sa myuser
-```
 
 </p>
 </details>
@@ -904,36 +302,6 @@ k create sa myuser
 <details><summary>show</summary>
 <p>
 
-```bash
-k run nginx --image=nginx --dry-run=client -oyaml > nginx.yaml
-vim nginx.yaml
-```
-
-```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  creationTimestamp: null
-  labels:
-    run: nginx
-  name: nginx
-spec:
-  serviceAccountName: myuser
-  containers:
-    - image: nginx
-      name: nginx
-      resources: {}
-  dnsPolicy: ClusterFirst
-  restartPolicy: Always
-status: {}
-```
-
-```bash
-k create -f nginx.yaml
-k get po
-k describe po nginx
-```
-
 </p>
 </details>
 
@@ -941,11 +309,6 @@ k describe po nginx
 
 <details><summary>show</summary>
 <p>
-
-```bash
-k create token myuser > mytoken.token
-    eyJhbGciOiJSUzI1NiIsImtpZCI6IkZkRWNHaUZzMHNYdFVTMDhObjZjM1dpdngzcFVCT19TTmtVcTNIaFNKX1UifQ.eyJhdWQiOlsiaHR0cHM6Ly9rdWJlcm5ldGVzLmRlZmF1bHQuc3ZjLmNsdXN0ZXIubG9jYWwiLCJrM3MiXSwiZXhwIjoxNzM2MzY3MTQyLCJpYXQiOjE3MzYzNjM1NDIsImlzcyI6Imh0dHBzOi8va3ViZXJuZXRlcy5kZWZhdWx0LnN2Yy5jbHVzdGVyLmxvY2FsIiwianRpIjoiOTg0YzlhMzEtOTY4Yi00MDNkLTg1YjAtMjQwMTU5ZGQ1NGVlIiwia3ViZXJuZXRlcy5pbyI6eyJuYW1lc3BhY2UiOiJzZWNyZXQtb3BzIiwic2VydmljZWFjY291bnQiOnsibmFtZSI6Im15dXNlciIsInVpZCI6IjFmNDM0OGE4LTc5NTktNGI0OS1iOTgxLTg1NDAzNWY4OTNhMCJ9fSwibmJmIjoxNzM2MzYzNTQyLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6c2VjcmV0LW9wczpteXVzZXIifQ.K2Vv4LLXzHCNHMqIhZ9QdO7Z5RIofG9erLD4dpnH9TwK3Ovq4Qxw4CAVLmj1fpr6GVi3lCnn_ZTOV6cp0tPQpqEjuPb9-2B_MeN4uAYYeH0avcMqJK8SkUbTFIn2IhFCAg1I5OOrMMhyjg3GvbKQYWl7olB6cgLpHUmu3AAVP_OJ4inMkN45Uyu7XWiKSRjSe-LA0Ez0vPaWh_GfBAoE0_31h2V5oWmaIuJhXxRCJCD7uXmP4io8Y_dtlDwzkUf5WgI7WtUXJYzCjWlqEcsIkXym509UovIsMjb8v1eoJUYnFPWY4jfEkkWLbJUEFgx9fo5evz34Vus7mUuugKQBYQ
-```
 
 </p>
 </details>

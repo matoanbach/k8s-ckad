@@ -19,18 +19,6 @@ kubernetes.io > Documentation > Concepts > Overview > Working with Kubernetes Ob
 <details><summary>show</summary>
 <p>
 
-```bash
-k run nginx1 --image=nginx --restart=Never --labels=app=v1
-k run nginx2 --image=nginx --restart=Never --labels=app=v1
-k run nginx3 --image=nginx --restart=Never --labels=app=v1
-```
-
-or
-
-```bash
-for i in `seq 1 3`; do k run nginx$i --image=nginx --restart=Never --labels=app=v1; done
-```
-
 </p>
 </details>
 
@@ -38,10 +26,6 @@ for i in `seq 1 3`; do k run nginx$i --image=nginx --restart=Never --labels=app=
 
 <details><summary>show</summary>
 <p>
-
-```bash
-k get pod --show-labels
-```
 
 </p>
 </details>
@@ -51,10 +35,6 @@ k get pod --show-labels
 <details><summary>show</summary>
 <p>
 
-```bash
-k label pod nginx2 app=v2 --overwrite
-```
-
 </p>
 </details>
 
@@ -62,11 +42,6 @@ k label pod nginx2 app=v2 --overwrite
 
 <details><summary>show</summary>
 <p>
-
-```bash
-k get pod -L app
-k get pod -label-columes=app
-```
 
 </p>
 </details>
@@ -76,11 +51,6 @@ k get pod -label-columes=app
 <details><summary>show</summary>
 <p>
 
-```bash
-k get pod -l app=v2
-k get pod --selector=app=v2
-```
-
 </p>
 </details>
 
@@ -88,10 +58,6 @@ k get pod --selector=app=v2
 
 <details><summary>show</summary>
 <p>
-
-```bash
-k label -l "app in (v1,v2)" tier=web
-```
 
 </p>
 </details>
@@ -101,10 +67,6 @@ k label -l "app in (v1,v2)" tier=web
 <details><summary>show</summary>
 <p>
 
-```bash
-k annotate pods -l app=v2 owner=marketing
-```
-
 </p>
 </details>
 
@@ -112,12 +74,6 @@ k annotate pods -l app=v2 owner=marketing
 
 <details><summary>show</summary>
 <p>
-
-```bash
-k label pod nginx1 nginx2 nginx3 app-
-k label pod nginx{1..3} app-
-k label pod -l app app-
-```
 
 </p>
 </details>
@@ -127,11 +83,6 @@ k label pod -l app app-
 <details><summary>show</summary>
 <p>
 
-```bash
-k annotate pods nginx1 nginx2 nginx3 description="my description"
-k annotate pods nginx{1..3} description="my description"
-```
-
 </p>
 </details>
 
@@ -139,13 +90,6 @@ k annotate pods nginx{1..3} description="my description"
 
 <details><summary>show</summary>
 <p>
-
-```bash
-k annotate pod nginx1 --list
-k describe pod nginx1 | grep annotations:
-k get pod nginx1 -oyaml | grep annotations:
-k get po nginx -o custom-column=Name:metadata.name,ANNOTATIONS:metadata.annotations.description
-```
 
 </p>
 </details>
@@ -155,10 +99,6 @@ k get po nginx -o custom-column=Name:metadata.name,ANNOTATIONS:metadata.annotati
 <details><summary>show</summary>
 <p>
 
-```bash
-k annotate pod nginx{1..3} description- owner-
-```
-
 </p>
 </details>
 
@@ -166,10 +106,6 @@ k annotate pod nginx{1..3} description- owner-
 
 <details><summary>show</summary>
 <p>
-
-```bash
-k delete --force pod nginx1 nginx2 nginx3
-```
 
 </p>
 </details>
@@ -181,35 +117,6 @@ k delete --force pod nginx1 nginx2 nginx3
 <details><summary>show</summary>
 <p>
 
-```bash
-k label nodes mynode accelerator=nvidia-tesla-p100
-k run newpod --image=nginx --restart=Never --dry-run=client -oyaml > newpod.yaml
-vim newpod.yaml
-```
-
-```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  creationTimestamp: null
-  labels:
-    run: newpod
-  name: newpod
-spec:
-  nodeSelector:
-    accelerator: nvidia-tesla-p100
-  containers:
-    - image: nginx
-      name: newpod
-      resources: {}
-  dnsPolicy: ClusterFirst
-  restartPolicy: Never
-```
-
-```bash
-k create -f newpod.yaml
-```
-
 </p>
 </details>
 
@@ -218,47 +125,6 @@ k create -f newpod.yaml
 <details><summary>show</summary>
 <p>
 
-```bash
-k taint node mynode tier=frontend:NoSchedule
-```
-
-```bash
-k run nginx --image=nginx --restart=Never --dry-run=client -oyaml > newpod.yaml
-vim newpod.yaml
-```
-
-```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  creationTimestamp: null
-  labels:
-    run: nginx
-  name: nginx
-spec:
-  tolerations:
-    key: "tier"
-    operator: "Equal"
-    value: "frontend"
-    effect: "NoSchedule"
-  containers:
-    - image: nginx
-      name: nginx
-      resources: {}
-  dnsPolicy: ClusterFirst
-  restartPolicy: Never
-```
-
-```bash
-k create -f newpod.yaml
-k describe pod nginx | grep -i node
-
-Node:             controlplane/192.168.251.229
-Node-Selectors:              <none>
-Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
-                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
-```
-
 </p>
 </details>
 
@@ -266,36 +132,6 @@ Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists fo
 
 <details><summary>show</summary>
 <p>
-
-```bash
-k run nginx --image=nginx --restart=Never --dry-run=client -oyaml > newpod.yaml
-vim newpod.yaml
-```
-
-```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  creationTimestamp: null
-  labels:
-    run: nginx
-  name: nginx
-spec:
-  nodeSelector:
-    beta.kubernetes.io/arch: amd64 # any label works as long as it's part of controlplane's labels
-  tolerations:
-    key: "tier"
-    operator: "Equal"
-    value: "frontend"
-    effect: "NoSchedule"
-  containers:
-    - image: nginx
-      name: nginx
-      resources: {}
-  dnsPolicy: ClusterFirst
-  restartPolicy: Never
-status: {}
-```
 
 </p>
 </details>
@@ -309,10 +145,6 @@ kubernetes.io > Documentation > Concepts > Workloads > Workload Resources > [Dep
 <details><summary>show</summary>
 <p>
 
-```bash
-k create deployment nginx --image=nginx:1.18.0 --replicas=2 --port=80
-```
-
 </p>
 </details>
 
@@ -320,10 +152,6 @@ k create deployment nginx --image=nginx:1.18.0 --replicas=2 --port=80
 
 <details><summary>show</summary>
 <p>
-
-```bash
-k get deployment nginx -oyaml
-```
 
 </p>
 </details>
@@ -333,10 +161,6 @@ k get deployment nginx -oyaml
 <details><summary>show</summary>
 <p>
 
-```bash
-k get replicaset <replicaset name> -oyaml
-```
-
 </p>
 </details>
 
@@ -344,10 +168,6 @@ k get replicaset <replicaset name> -oyaml
 
 <details><summary>show</summary>
 <p>
-
-```bash
-k get pod <pod name> -oyaml
-```
 
 </p>
 </details>
@@ -357,11 +177,6 @@ k get pod <pod name> -oyaml
 <details><summary>show</summary>
 <p>
 
-```bash
-k rollout status deployment nginx
-k rollout history deployment nginx
-```
-
 </p>
 </details>
 
@@ -369,11 +184,6 @@ k rollout history deployment nginx
 
 <details><summary>show</summary>
 <p>
-
-```bash
-k set image deployment nginx nginx=nginx:1.19.8
-k edit deployment nginx
-```
 
 </p>
 </details>
@@ -383,13 +193,6 @@ k edit deployment nginx
 <details><summary>show</summary>
 <p>
 
-```bash
-k rollout history deployment nginx
-k get deploy nginx
-k get rs
-k get po
-```
-
 </p>
 </details>
 
@@ -397,11 +200,6 @@ k get po
 
 <details><summary>show</summary>
 <p>
-
-```bash
-k rollout undo deployment nginx
-k rollout undo deployment nginx --to-revision=<version of rollout>
-```
 
 </p>
 </details>
@@ -411,10 +209,6 @@ k rollout undo deployment nginx --to-revision=<version of rollout>
 <details><summary>show</summary>
 <p>
 
-```bash
-k set image deployment nginx nginx=nginx:11000000 # wrong image
-```
-
 </p>
 </details>
 
@@ -422,13 +216,6 @@ k set image deployment nginx nginx=nginx:11000000 # wrong image
 
 <details><summary>show</summary>
 <p>
-
-```bash
-k rollout status deployment nginx
-k get deploy nginx
-k get rs
-k get po
-```
 
 </p>
 </details>
@@ -438,11 +225,6 @@ k get po
 <details><summary>show</summary>
 <p>
 
-```bash
-k rollout undo deployment nginx --to-revision=2
-k rollout status deployment nginx
-```
-
 </p>
 </details>
 
@@ -450,10 +232,6 @@ k rollout status deployment nginx
 
 <details><summary>show</summary>
 <p>
-
-```bash
-k rollout history deployment nginx --revision=4
-```
 
 </p>
 </details>
@@ -463,10 +241,6 @@ k rollout history deployment nginx --revision=4
 <details><summary>show</summary>
 <p>
 
-```bash
-k scale deployment nginx --replicas=5
-```
-
 </p>
 </details>
 
@@ -474,11 +248,6 @@ k scale deployment nginx --replicas=5
 
 <details><summary>show</summary>
 <p>
-
-```bash
-k autoscale deployment nginx --min=5 --max=10 --cpu-percent=80
-k get hpa deployment nginx
-```
 
 </p>
 </details>
@@ -488,10 +257,6 @@ k get hpa deployment nginx
 <details><summary>show</summary>
 <p>
 
-```bash
-k rollout pause deployment nginx
-```
-
 </p>
 </details>
 
@@ -499,10 +264,6 @@ k rollout pause deployment nginx
 
 <details><summary>show</summary>
 <p>
-
-```bash
-k set image deployment nginx nginx=nginx:1.19.9
-```
 
 </p>
 </details>
@@ -512,10 +273,6 @@ k set image deployment nginx nginx=nginx:1.19.9
 <details><summary>show</summary>
 <p>
 
-```bash
-k rollout resume deployment nginx
-```
-
 </p>
 </details>
 
@@ -524,13 +281,6 @@ k rollout resume deployment nginx
 <details><summary>show</summary>
 <p>
 
-```bash
-k delete deployment nginx --force
-k delete hpa nginx
-#or
-k delete deployment/nginx hpa/nginx
-```
-
 </p>
 </details>
 
@@ -538,96 +288,6 @@ k delete deployment/nginx hpa/nginx
 
 <details><summary>show</summary>
 <p>
-
-```bash
-k create deployment old --image=nginx --replicas=3 --dry-run=client -oyaml > old.yaml
-vim old.yaml
-```
-
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  creationTimestamp: null
-  labels:
-    version: v2
-    app: backend
-  name: old
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: backend
-  strategy: {}
-  template:
-    metadata:
-      creationTimestamp: null
-      labels:
-        version: v1
-        app: backend
-    spec:
-      containers:
-        - image: nginx
-          name: nginx
-          resources: {}
-status: {}
-```
-
-```bash
-k create deployment new --image=nginx  --replicas=1  --dry-run=client -oyaml > new.yaml
-```
-
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  creationTimestamp: null
-  labels:
-    app: backend
-  name: new
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      version: v2
-      app: backend
-  strategy: {}
-  template:
-    metadata:
-      creationTimestamp: null
-      labels:
-        version: v2
-        app: backend
-    spec:
-      containers:
-        - image: nginx
-          name: nginx
-          resources: {}
-status: {}
-```
-
-```bash
-k expose deployment old --name=backend-service --port=80 --selector=app=backend --dry-run=client -oyaml
-```
-
-```yaml
-apiVersion: v1
-kind: Service
-metadata:
-  creationTimestamp: null
-  labels:
-    app: backend
-  name: backend-service
-spec:
-  ports:
-    - port: 80
-      protocol: TCP
-      targetPort: 80
-  selector:
-    app: backend
-status:
-  loadBalancer: {}s
-```
 
 </p>
 </details>
@@ -639,10 +299,6 @@ status:
 <details><summary>show</summary>
 <p>
 
-```bash
-k create job pi --image=perl:5.34 --restart=Never --command -- sh -c "perl -Mbignum=bpi -wle 'print bpi(2000)'"
-```
-
 </p>
 </details>
 
@@ -650,12 +306,6 @@ k create job pi --image=perl:5.34 --restart=Never --command -- sh -c "perl -Mbig
 
 <details><summary>show</summary>
 <p>
-
-```bash
-k get job pi -owide
-k describe job pi -owide
-k logs pi
-```
 
 </p>
 </details>
@@ -665,15 +315,6 @@ k logs pi
 <details><summary>show</summary>
 <p>
 
-```bash
-k create job busybox --image=busybox -- sh -c 'echo hello;sleep 30;echo world'
-```
-
-```bash
-k logs busybox-nvjdj
-> hello
-```
-
 </p>
 </details>
 
@@ -681,10 +322,6 @@ k logs busybox-nvjdj
 
 <details><summary>show</summary>
 <p>
-
-```bash
-k logs busybox-nvjdj -f
-```
 
 </p>
 </details>
@@ -694,12 +331,6 @@ k logs busybox-nvjdj -f
 <details><summary>show</summary>
 <p>
 
-```bash
-k get job
-k describe job busybox
-k logs jobs/busybox
-```
-
 </p>
 </details>
 
@@ -707,10 +338,6 @@ k logs jobs/busybox
 
 <details><summary>show</summary>
 <p>
-
-```bash
-k delete job busybox pi
-```
 
 </p>
 </details>
@@ -720,31 +347,6 @@ k delete job busybox pi
 <details><summary>show</summary>
 <p>
 
-```bash
-k create job newjob --image=nginx --dry-run=client -oyaml > newjob.yaml
-vim newjob.yaml
-```
-
-```yaml
-apiVersion: batch/v1
-kind: Job
-metadata:
-  creationTimestamp: null
-  name: newjob
-spec:
-  activeDeadlineSeconds: 30
-  template:
-    metadata:
-      creationTimestamp: null
-    spec:
-      containers:
-        - image: nginx
-          name: newjob
-          resources: {}
-      restartPolicy: Never
-status: {}
-```
-
 </p>
 </details>
 
@@ -753,34 +355,6 @@ status: {}
 <details><summary>show</summary>
 <p>
 
-```yaml
-apiVersion: batch/v1
-kind: Job
-metadata:
-  creationTimestamp: null
-  name: newjob
-spec:
-  completions: 5
-  activeDeadlineSeconds: 30
-  template:
-    metadata:
-      creationTimestamp: null
-    spec:
-      containers:
-        - image: nginx
-          name: newjob
-          resources: {}
-      restartPolicy: Never
-status: {}
-```
-
-```bash
-k get job newjob -owde
-k describe job newjob
-k get pod
-k delete job newjob
-```
-
 </p>
 </details>
 
@@ -788,35 +362,6 @@ k delete job newjob
 
 <details><summary>show</summary>
 <p>
-
-```yaml
-apiVersion: batch/v1
-kind: Job
-metadata:
-  creationTimestamp: null
-  name: newjob
-spec:
-  completions: 5
-  parallelism: 5
-  activeDeadlineSeconds: 30
-  template:
-    metadata:
-      creationTimestamp: null
-    spec:
-      containers:
-        - image: nginx
-          name: newjob
-          resources: {}
-      restartPolicy: Never
-status: {}
-```
-
-```bash
-k get job newjob -owde
-k describe job newjob
-k get pod
-k delete job newjob
-```
 
 </p>
 </details>
@@ -830,39 +375,6 @@ kubernetes.io > Documentation > Tasks > Run Jobs > [Running Automated Tasks with
 <details><summary>show</summary>
 <p>
 
-```bash
-k create cronjob nginx --image=nginx  --schedule="*/1 * * * *" --dry-run=client -oyaml -- /bin/sh -c 'date; echo Hello from the Kubernetes cluster'
-```
-
-```yaml
-apiVersion: batch/v1
-kind: CronJob
-metadata:
-  creationTimestamp: null
-  name: nginx
-spec:
-  jobTemplate:
-    metadata:
-      creationTimestamp: null
-      name: nginx
-    spec:
-      template:
-        metadata:
-          creationTimestamp: null
-        spec:
-          containers:
-            - image: nginx
-              name: nginx
-              resources: {}
-              command:
-                - /bin/sh
-                - -c
-                - "date; echo Hello from the Kubernetes cluster"
-          restartPolicy: OnFailure
-  schedule: "* * * * *"
-status: {}
-```
-
 </p>
 </details>
 
@@ -870,17 +382,6 @@ status: {}
 
 <details><summary>show</summary>
 <p>
-
-```bash
-k get po
-k logs nginx-28939212-z7285
-> Wed Jan  8 16:09:04 UTC 2025
-> Hello from the Kubernetes cluster
-```
-
-```bash
-k delete cj busy
-```
 
 </p>
 </details>
@@ -890,11 +391,6 @@ k delete cj busy
 <details><summary>show</summary>
 <p>
 
-```bash
-k get cj
-k get job -w
-```
-
 </p>
 </details>
 
@@ -902,10 +398,6 @@ k get job -w
 
 <details><summary>show</summary>
 <p>
-
-```bash
-k create cronjob busybox --image=busybox --schedule="*/1 * * * *" --dry-run=client -oyaml -- /bin/sh -c 'date; echo Hello from the Kubernetes cluster' > anothercronjob.yaml
-```
 
 </p>
 </details>
@@ -915,41 +407,6 @@ k create cronjob busybox --image=busybox --schedule="*/1 * * * *" --dry-run=clie
 <details><summary>show</summary>
 <p>
 
-```bash
-k create cronjob busybox --image=busybox --schedule="* * * * *" --dry-run=client -oyaml -- /bin/sh -c 'date; echo Hello
-from the Kubernetes cluster' > anothercronjob.yaml
-```
-
-```yaml
-apiVersion: batch/v1
-kind: CronJob
-metadata:
-  creationTimestamp: null
-  name: busybox
-spec:
-  startingDeadlineSeconds: 17 # add this line
-  jobTemplate:
-    metadata:
-      creationTimestamp: null
-      name: busybox
-    spec:
-      template:
-        metadata:
-          creationTimestamp: null
-        spec:
-          containers:
-            - command:
-                - /bin/sh
-                - -c
-                - date; echo Hello from the Kubernetes cluster
-              image: busybox
-              name: busybox
-              resources: {}
-          restartPolicy: OnFailure
-  schedule: "* * * * *"
-status: {}
-```
-
 </p>
 </details>
 
@@ -957,10 +414,6 @@ status: {}
 
 <details><summary>show</summary>
 <p>
-
-```bash
-k create job anotherjob --from=cronjob/busyboxs
-```
 
 </p>
 </details>

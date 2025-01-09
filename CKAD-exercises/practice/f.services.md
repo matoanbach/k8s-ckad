@@ -7,21 +7,6 @@
 <details><summary>show</summary>
 <p>
 
-```bash
-k run nginx --image=nginx --port=80
-
-```
-
-```bash
-k expose pod nginx --port=80 --type=ClusterIP
-```
-
-or
-
-```bash
-k run nginx --image=nginx --port=80 --expose
-```
-
 </p>
 </details>
 
@@ -29,12 +14,6 @@ k run nginx --image=nginx --port=80 --expose
 
 <details><summary>show</summary>
 <p>
-
-```bash
-k get po -owide
-k get svc
-k get ep
-```
 
 </p>
 </details>
@@ -44,10 +23,9 @@ k get ep
 <details><summary>show</summary>
 <p>
 
-```bash
-k run tmp --restart=Never --rm --image=nginx:alpine -it -- curl -m 5 <svcIP:port>
-k run tmp --restart=Never --rm --image=nginx:alpine -it -- curl -m 5 <podIP>
-```
+</p>
+or
+<p>
 
 </p>
 </details>
@@ -57,54 +35,6 @@ k run tmp --restart=Never --rm --image=nginx:alpine -it -- curl -m 5 <podIP>
 <details><summary>show</summary>
 <p>
 
-```bash
-k edit svc nginx
-```
-
-```yaml
-apiVersion: v1
-kind: Service
-metadata:
-  creationTimestamp: "2025-01-08T19:51:06Z"
-  labels:
-    run: nginx
-  name: nginx
-  namespace: default
-  resourceVersion: "959"
-  uid: c5bef0db-ab79-49bb-b814-d713b2d5c2b1
-spec:
-  clusterIP: 10.43.28.250
-  clusterIPs:
-    - 10.43.28.250
-  externalTrafficPolicy: Cluster
-  internalTrafficPolicy: Cluster
-  ipFamilies:
-    - IPv4
-  ipFamilyPolicy: SingleStack
-  ports:
-    - nodePort: 30010
-      port: 80
-      protocol: TCP
-      targetPort: 80
-  selector:
-    run: nginx
-  sessionAffinity: None
-  type: NodePort
-```
-
-```bash
-k get svc
-# result:
-NAME         TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)        AGE
-kubernetes   ClusterIP   10.96.0.1        <none>        443/TCP        1d
-nginx        NodePort    10.107.253.138   <none>        80:31931/TCP   3m
-```
-
-```bash
-curl -m 5 <PodIP>
-curl -m 5 <svcIP:PORT>
-```
-
 </p>
 </details>
 
@@ -112,41 +42,6 @@ curl -m 5 <svcIP:PORT>
 
 <details><summary>show</summary>
 <p>
-
-```bash
-k create deployment foo --image=dgkanatsios/simpleapp --replicas=3 --dry-run=client -oyaml > foo.yaml
-kubectl label deployment foo --overwrite app=foo #This is optional since kubectl create deploy foo will create label app=foo by default
-
-```
-
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  creationTimestamp: null
-  labels:
-    app: foo
-  name: foo
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: foo
-  strategy: {}
-  template:
-    metadata:
-      creationTimestamp: null
-      labels:
-        app: foo
-    spec:
-      containers:
-        - image: dgkanatsios/simpleapp
-          name: simpleapp
-          ports:
-            - containerPort: 8080
-          resources: {}
-status: {}
-```
 
 </p>
 </details>
@@ -156,18 +51,6 @@ status: {}
 <details><summary>show</summary>
 <p>
 
-```bash
-k run tmp --image=busybox --restart=Never --rm -it -- wget -O- 10.42.0.14:8080
-
-# output
-Connecting to 10.42.0.14:8080 (10.42.0.14:8080)
-writing to stdout
-Hello world from foo-6b747fc57f-fb77z and version 2.0
--                    100% |********************************|    54  0:00:00 ETA
-written to stdout
-pod "tmp" deleted
-```
-
 </p>
 </details>
 
@@ -176,14 +59,6 @@ pod "tmp" deleted
 <details><summary>show</summary>
 <p>
 
-```bash
-k expose deployment foo --name=foo-service --port=6262 --target-port=8080
-```
-
-```bash
-k get svc
-```
-
 </p>
 </details>
 
@@ -191,17 +66,6 @@ k get svc
 
 <details><summary>show</summary>
 <p>
-
-```bash
-k run tmp --image=busybox --restart=Never --rm -it -- wget -O- 10.43.215.40:6262
-# output
-Connecting to 10.43.215.40:6262 (10.43.215.40:6262)
-writing to stdout
-Hello world from foo-6b747fc57f-fb77z and version 2.0
--                    100% |********************************|    54  0:00:00 ETA
-written to stdout
-pod "tmp" deleted
-```
 
 </p>
 </details>
@@ -214,47 +78,6 @@ kubernetes.io > Documentation > Concepts > Services, Load Balancing, and Network
 
 <details><summary>show</summary>
 <p>
-
-```bash
-k create deployment nginx --image=nginx --replicas=2 --port=80 > nginx.yaml
-vim nginx.yaml
-```
-
-```bash
-k expose deployment nginx --name=nginx-service --port=80 --target-port=80
-```
-
-```yaml
-#netpol.yaml
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: test-network-policy
-  namespace: default
-spec:
-  podSelector:
-    matchLabels:
-      app: nginx
-  policyTypes:
-    - Ingress
-  ingress:
-    - from:
-        - podSelector:
-            matchLabels:
-              access: granted
-```
-
-```bash
-k create -f netpol.yaml
-```
-
-```bash
-k get po -owide
-k get svc
-
-k run tmp --image=busybox --restart=Never --rm -it -- wget -O- 10.42.0.21:80 # won't work
-k run tmp --image=busybox --restart=Never --rm --labels=access=granted -it -- wget -O- 10.42.0.21:80 # will work
-```
 
 </p>
 </details>
