@@ -17,6 +17,13 @@ kubernetes.io > Documentation > Tasks > Access Applications in a Cluster > [Use 
 <details><summary>show</summary>
 <p>
 
+```bash
+k create ns mynamespace
+```
+
+```bash
+k run nginx --image=nginx  --restart=Never -n mynamespace
+```
 
 </p>
 </details>
@@ -26,6 +33,11 @@ kubernetes.io > Documentation > Tasks > Access Applications in a Cluster > [Use 
 <details><summary>show</summary>
 <p>
 
+```bash
+k run nginx --image=nginx --restart=Never -n mynamespae --dry-run=client -oyaml > nginx.yaml
+
+k create -f nginx.yaml
+```
 
 </p>
 </details>
@@ -35,7 +47,22 @@ kubernetes.io > Documentation > Tasks > Access Applications in a Cluster > [Use 
 <details><summary>show</summary>
 <p>
 
+```bash
+k run busybox --image=busybox --restart=Never --rm -it -- env
+# output
 
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+HOSTNAME=busybox
+KUBERNETES_PORT_443_TCP=tcp://10.43.0.1:443
+KUBERNETES_PORT_443_TCP_PROTO=tcp
+KUBERNETES_PORT_443_TCP_PORT=443
+KUBERNETES_PORT_443_TCP_ADDR=10.43.0.1
+KUBERNETES_SERVICE_HOST=10.43.0.1
+KUBERNETES_SERVICE_PORT=443
+KUBERNETES_SERVICE_PORT_HTTPS=443
+KUBERNETES_PORT=tcp://10.43.0.1:443
+HOME=/root
+```
 
 </p>
 </details>
@@ -45,6 +72,34 @@ kubernetes.io > Documentation > Tasks > Access Applications in a Cluster > [Use 
 <details><summary>show</summary>
 <p>
 
+```bash
+k run busybox --image=busybox --restart=Never --dry-run=client -oyaml -- env > busybox.yaml
+vim busy.yaml
+```
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: busybox
+  name: busybox
+spec:
+  containers:
+    - args:
+        - env
+      image: busybox
+      name: busybox
+      resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Never
+status: {}
+```
+
+```bash
+k create -f busy.box
+```
 
 </p>
 </details>
@@ -54,6 +109,10 @@ kubernetes.io > Documentation > Tasks > Access Applications in a Cluster > [Use 
 <details><summary>show</summary>
 <p>
 
+```bash
+k create ns myns --dry-run=client -oyaml > myns.yaml
+```
+
 </p>
 </details>
 
@@ -61,6 +120,10 @@ kubernetes.io > Documentation > Tasks > Access Applications in a Cluster > [Use 
 
 <details><summary>show</summary>
 <p>
+
+```bash
+k create quota myrq --hard=cpu=1,memory=1G,pods=2 --dry-run=client -oyaml > myrq.yaml
+```
 
 </p>
 </details>
@@ -70,6 +133,11 @@ kubernetes.io > Documentation > Tasks > Access Applications in a Cluster > [Use 
 <details><summary>show</summary>
 <p>
 
+```bash
+k get pods -A
+k get pods --all-namespaces
+```
+
 </p>
 </details>
 
@@ -77,6 +145,14 @@ kubernetes.io > Documentation > Tasks > Access Applications in a Cluster > [Use 
 
 <details><summary>show</summary>
 <p>
+
+```bash
+k run nginx --image=nginx --restart=Never --port=80 --expose
+```
+
+```bash
+k run tmp --restart=Never --rm --image=nginx:alpine -it -- wget -O- nginx:80
+```
 
 </p>
 </details>
@@ -86,6 +162,13 @@ kubernetes.io > Documentation > Tasks > Access Applications in a Cluster > [Use 
 <details><summary>show</summary>
 <p>
 
+```bash
+k set image pod nginx nginx=nginx:1.24.0
+```
+
+```bash
+k describe pod nginx | grep -i image
+```
 
 </p>
 </details>
@@ -95,6 +178,14 @@ kubernetes.io > Documentation > Tasks > Access Applications in a Cluster > [Use 
 <details><summary>show</summary>
 <p>
 
+```bash
+k get pod nginx -owide
+```
+
+```bash
+k run tmp --restart=Never --rm --image=nginx:alpine -it -- wget -O- nginx:80
+```
+
 </p>
 </details>
 
@@ -103,6 +194,10 @@ kubernetes.io > Documentation > Tasks > Access Applications in a Cluster > [Use 
 <details><summary>show</summary>
 <p>
 
+```bash
+k get pod nginx -oyaml > nginx.yaml
+cat nginx.yaml
+```
 
 </p>
 </details>
@@ -112,6 +207,11 @@ kubernetes.io > Documentation > Tasks > Access Applications in a Cluster > [Use 
 <details><summary>show</summary>
 <p>
 
+```bash
+k get pod nginx
+k describe pod nginx
+```
+
 </p>
 </details>
 
@@ -120,6 +220,9 @@ kubernetes.io > Documentation > Tasks > Access Applications in a Cluster > [Use 
 <details><summary>show</summary>
 <p>
 
+```bash
+k logs nginx
+```
 
 </p>
 </details>
@@ -129,6 +232,11 @@ kubernetes.io > Documentation > Tasks > Access Applications in a Cluster > [Use 
 <details><summary>show</summary>
 <p>
 
+```bash
+k logs nginx -p
+k logs nginx --previous
+```
+
 </p>
 </details>
 
@@ -136,6 +244,10 @@ kubernetes.io > Documentation > Tasks > Access Applications in a Cluster > [Use 
 
 <details><summary>show</summary>
 <p>
+
+```bash
+k exec nginx -it -- /bin/sh
+```
 
 </p>
 </details>
@@ -145,6 +257,10 @@ kubernetes.io > Documentation > Tasks > Access Applications in a Cluster > [Use 
 <details><summary>show</summary>
 <p>
 
+```bash
+k run busybox --image=busybox --restart=Never -it -- /bin/sh -c 'echo "Hello world"'
+```
+
 </p>
 </details>
 
@@ -153,6 +269,9 @@ kubernetes.io > Documentation > Tasks > Access Applications in a Cluster > [Use 
 <details><summary>show</summary>
 <p>
 
+```bash
+k run busybox --image=busybox --restart=Never --rm -it -- /bin/sh -c 'echo "Hello world"'
+```
 
 </p>
 </details>
@@ -161,6 +280,16 @@ kubernetes.io > Documentation > Tasks > Access Applications in a Cluster > [Use 
 
 <details><summary>show</summary>
 <p>
+
+```bash
+k run nginx --image=nginx --restart=Never --env=var1=val1
+```
+
+```bash
+k exec nginx -it -- sh -c 'echo $var1'
+# output
+val1
+```
 
 </p>
 </details>
