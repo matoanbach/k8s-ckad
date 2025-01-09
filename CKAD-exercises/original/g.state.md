@@ -15,35 +15,62 @@ kubernetes.io > Documentation > Tasks > Configure Pods and Containers > [Configu
 
 _This question is probably a better fit for the 'Multi-container-pods' section but I'm keeping it here as it will help you get acquainted with state_
 
+```bash
+k run busybox --image=busybox --restart=Never --dry-run=client -oyaml --command -- /bin/sh -c 'sleep 3600' > busybox.yaml
+```
+
 ```yaml
 apiVersion: v1
 kind: Pod
 metadata:
-  name: nginx
+  creationTimestamp: null
+  labels:
+    run: busybox
+  name: mybusybox
 spec:
   containers:
-    - name: busybox1
+    - command:
+        - /bin/sh
+        - -c
+        - sleep 3600
       image: busybox
+      name: busybox1
+      resources: {}
       volumeMounts:
-        - name: volume-mount
+        - name: shared-volume
           mountPath: /etc/foo
-      command: ["sleep", "3600"]
-    - name: busybox2
+
+    - command:
+        - /bin/sh
+        - -c
+        - sleep 3600
       image: busybox
+      name: busybox2
+      resources: {}
       volumeMounts:
-        - name: volume-mount
+        - name: shared-volume
           mountPath: /etc/foo
-      command: ["sleep", "3600"]
   volumes:
-    - name: volume-mount
+    - name: shared-volume
       emptyDir: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Never
+status: {}
 ```
 
 ```bash
-k exec nginx -c busybox2 -it -- cat /etc/passwd > '/etc/foo/passwd'
+kubectl exec -it busybox -c busybox2 -- /bin/sh
+cat /etc/passwd | cut -f 1 -d ':' > /etc/foo/passwd # instead of cut command you can use awk -F ":" '{print $1}'
+cat /etc/foo/passwd # confirm that stuff has been written successfully
+exit
+```
 
-k exec nginx -c busybox1 -it -- echo '/etc/foo/passwd'
-
+```bash
+kubectl exec -it busybox -c busybox -- /bin/sh
+mount | grep foo # confirm the mounting
+cat /etc/foo/passwd
+exit
+kubectl delete po busybox
 ```
 
 </p>
@@ -54,6 +81,37 @@ k exec nginx -c busybox1 -it -- echo '/etc/foo/passwd'
 <details><summary>show</summary>
 <p>
 
+```yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: myvolume
+  labels:
+    type: local
+spec:
+  storageClassName: normal
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+    - ReadWriteMany
+  hostPath:
+    path: "/etc/foo"s
+```
+
+```bash
+k create -f pv.yaml
+# output
+persistentvolume/myvolume created
+```
+
+```bash
+k get pv
+# output
+NAME       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS      CLAIM   STORAGECLASS   VOLUMEATTRIBUTESCLASS   REASON   AGE
+myvolume   10Gi       RWO,RWX        Retain           Available           normal         <unset>
+```
+
 </p>
 </details>
 
@@ -61,6 +119,31 @@ k exec nginx -c busybox1 -it -- echo '/etc/foo/passwd'
 
 <details><summary>show</summary>
 <p>
+
+```yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: myvolume
+  labels:
+    type: local
+spec:
+  storageClassName: normal
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+    - ReadWriteMany
+  hostPath:
+    path: "/etc/foo"
+```
+
+```bash
+k get pv
+# output
+NAME       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM           STORAGECLASS   VOLUMEATTRIBUTESCLASS   REASON   AGE
+myvolume   10Gi       RWO,RWX        Retain           Bound    default/mypvc   normal         <unset>
+```
 
 </p>
 </details>
@@ -70,6 +153,43 @@ k exec nginx -c busybox1 -it -- echo '/etc/foo/passwd'
 <details><summary>show</summary>
 <p>
 
+```bash
+k run busybox --image=busybox --restart=Never --dry-run=client -oyaml --command -- /bin/sh -c 'sleep 3600' > busybox.yaml
+```
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: busybox
+  name: busybox
+spec:
+  containers:
+    - command:
+        - /bin/sh
+        - -c
+        - sleep 3600
+      image: busybox
+      name: busybox
+      resources: {}
+      volumeMounts:
+        - name: mount-volume
+          mountPath: /etc/foo
+  volumes:
+    - name: mount-volume
+      persistentVolumeClaim:
+        claimName: mypvc
+  dnsPolicy: ClusterFirst
+  restartPolicy: Never
+status: {}
+```
+
+```bash
+kubectl exec busybox -it -- cp /etc/passwd /etc/foo/passwd
+```
+
 </p>
 </details>
 
@@ -78,6 +198,49 @@ k exec nginx -c busybox1 -it -- echo '/etc/foo/passwd'
 <details><summary>show</summary>
 <p>
 
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: busybox
+  name: busybox2
+spec:
+  containers:
+    - command:
+        - /bin/sh
+        - -c
+        - sleep 3600
+      image: busybox
+      name: busybox
+      resources: {}
+      volumeMounts:
+        - name: mount-volume
+          mountPath: /etc/foo
+  volumes:
+    - name: mount-volume
+      persistentVolumeClaim:
+        claimName: mypvc
+  dnsPolicy: ClusterFirst
+  restartPolicy: Never
+status: {}
+```
+
+```bash
+kubectl exec busybox -it -- cat /etc/passwd
+# output
+root:x:0:0:root:/root:/bin/sh
+daemon:x:1:1:daemon:/usr/sbin:/bin/false
+bin:x:2:2:bin:/bin:/bin/false
+sys:x:3:3:sys:/dev:/bin/false
+sync:x:4:100:sync:/bin:/bin/sync
+mail:x:8:8:mail:/var/spool/mail:/bin/false
+www-data:x:33:33:www-data:/var/www:/bin/false
+operator:x:37:37:Operator:/var:/bin/false
+nobody:x:65534:65534:nobody:/home:/bin/false
+```
+
 </p>
 </details>
 
@@ -85,6 +248,28 @@ k exec nginx -c busybox1 -it -- echo '/etc/foo/passwd'
 
 <details><summary>show</summary>
 <p>
+
+```bash
+kubectl run busybox --image=busybox --restart=Never -- sleep 3600
+```
+
+```bash
+k cp busybox:/etc/passwd .passwd
+```
+
+```bash
+cat .passwd
+# output
+root:x:0:0:root:/root:/bin/sh
+daemon:x:1:1:daemon:/usr/sbin:/bin/false
+bin:x:2:2:bin:/bin:/bin/false
+sys:x:3:3:sys:/dev:/bin/false
+sync:x:4:100:sync:/bin:/bin/sync
+mail:x:8:8:mail:/var/spool/mail:/bin/false
+www-data:x:33:33:www-data:/var/www:/bin/false
+operator:x:37:37:Operator:/var:/bin/false
+nobody:x:65534:65534:nobody:/home:/bin/false
+```
 
 </p>
 </details>
