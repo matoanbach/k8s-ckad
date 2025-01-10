@@ -11,7 +11,7 @@
 
 ```Dockerfile
 FROM docker.io/httpd:2.4
-RUN echo "Hello, World!" > /usr/local/apache2/htdocs/index.html
+RUN echo "Hello it's me" > /usr/local/apache2/htdocs/html
 ```
 
 </p>
@@ -23,30 +23,38 @@ RUN echo "Hello, World!" > /usr/local/apache2/htdocs/index.html
 <p>
 
 ```bash
-:~$ podman build -t simpleapp .
-STEP 1/2: FROM httpd:2.4
-STEP 2/2: RUN echo "Hello, World!" > /usr/local/apache2/htdocs/index.html
-COMMIT simpleapp
---> ef4b14a72d0
-Successfully tagged localhost/simpleapp:latest
-ef4b14a72d02ae0577eb0632d084c057777725c279e12ccf5b0c6e4ff5fd598b
+candidate@ckad9043:~/myimage$ sudo podman build -t mysimpleapp .
+STEP 1/2 : FROM docker.io/httpd:2.4
+STEP 2/2 : RUN echo "Hello it's me" > /usr/local/apache2/htdocs/index.html
+COMMIT mysimpleapp
+--> 3a9f62dac26
+Successfully tagged localhost/mysimpleapp:latest
+3a9f62dac26c84108a54b49cd0c67583046fb6f281de4445ff957760423ef65
+```
 
-:~$ podman images
-REPOSITORY               TAG         IMAGE ID      CREATED        SIZE
-localhost/simpleapp      latest      ef4b14a72d02  8 seconds ago  148 MB
-docker.io/library/httpd  2.4         98f93cd0ec3b  7 days ago     148 MB
+```bash
+candidate@ckad9043:~/myimage$ sudo podman images
+REPOSITORY                TAG                 IMAGE ID      CREATED          SIZE
+localhost/mysimpleapp     latest              3a9f62dac26c  2 minutes ago    151 MB
+localhost/simpleapp       latest              1097ccdfd41c  19 hours ago     151 MB
+docker.io/library/httpd   2.4                 4ce47c750a58  5 months ago     151 MB
+docker.io/library/registry 2                  75ef5b734af4  15 months ago    26 MB
+docker.io/library/golang  1.15.15-alpine3.14  1403af3b6d4a  3 years ago      308 MB
+```
 
-:~$ podman image tree localhost/simpleapp:latest
-Image ID: ef4b14a72d02
-Tags:     [localhost/simpleapp:latest]
-Size:     147.8MB
+```bash
+candidate@ckad9043:~/myimage$ sudo podman image tree localhost/mysimpleapp
+Image ID: 3a9f62dac26c
+Tags:      [localhost/mysimpleapp:latest]
+Size:      151.5MB
 Image Layers
-├── ID: ad6562704f37 Size:  83.9MB
-├── ID: c234616e1912 Size: 3.072kB
-├── ID: c23a797b2d04 Size: 2.721MB
-├── ID: ede2e092faf0 Size: 61.11MB
-├── ID: 971c2cdf3872 Size: 3.584kB Top Layer of: [docker.io/library/httpd:2.4]
-└── ID: 61644e82ef1f Size: 6.144kB Top Layer of: [localhost/simpleapp:latest]
+├─ ID: 8b296f486960 Size: 77.89MB
+├─ ID: 27719ec707e3 Size: 2.56kB
+├─ ID: e9e636c4974b Size: 1.024kB
+├─ ID: 65a9cfc2fdab Size: 10.64MB
+├─ ID: 9f74ca23e843 Size: 62.92MB
+├─ ID: 33907ab7ce7c Size: 3.584kB Top Layer of: [docker.io/library/httpd:2.4]
+└─ ID: 42012a369e31 Size: 6.144kB Top Layer of: [localhost/mysimpleapp:latest]
 ```
 
 </p>
@@ -58,21 +66,19 @@ Image Layers
 <p>
 
 ```bash
-:~$ podman run -d --name test -p 8080:80 localhost/simpleapp
-2f3d7d613ea6ba19703811d30704d4025123c7302ff6fa295affc9bd30e532f8
+candidate@ckad9043:~/myimage$ sudo podman run -d -p 8080:80 localhost/mysimpleapp
+748e796cae1d02d0b345f435bfcd4e31915da14e75090c85be516658b2ac417a
+```
 
-:~$ podman ps
-CONTAINER ID  IMAGE                       COMMAND           CREATED        STATUS            PORTS                 NAMES
-2f3d7d613ea6  localhost/simpleapp:latest  httpd-foreground  5 seconds ago  Up 6 seconds ago  0.0.0.0:8080->80/tcp  test
+```bash
+candidate@ckad9043:~/myimage$ sudo podman ps -a
+CONTAINER ID  IMAGE                            COMMAND          CREATED         STATUS             PORTS                   NAMES
+748e796cae1d  localhost/mysimpleapp:latest     httpd-foreground 2 minutes ago   Up 2 minutes ago   0.0.0.0:8080->80/tcp    sleepy_tesla
+```
 
-:~$ podman logs test
-AH00558: httpd: Could not reliably determine the server's fully qualified domain name, using 10.0.2.100. Set the 'ServerName' directive globally to suppress this message
-AH00558: httpd: Could not reliably determine the server's fully qualified domain name, using 10.0.2.100. Set the 'ServerName' directive globally to suppress this message
-[Sat Jun 04 16:15:38.071377 2022] [mpm_event:notice] [pid 1:tid 139756978220352] AH00489: Apache/2.4.53 (Unix) configured -- resuming normal operations
-[Sat Jun 04 16:15:38.073570 2022] [core:notice] [pid 1:tid 139756978220352] AH00094: Command line: 'httpd -D FOREGROUND'
-
-:~$ curl 0.0.0.0:8080
-Hello, World!
+```bash
+candidate@ckad9043:~/myimage$ curl -m 5 0.0.0.0:8080
+Hello it's me
 ```
 
 </p>
@@ -84,8 +90,8 @@ Hello, World!
 <p>
 
 ```bash
-:~$ podman exec -it test cat /usr/local/apache2/htdocs/index.html
-Hello, World!
+candidate@ckad9043:~/myimage$ sudo podman exec -it 748e796cae1d cat /usr/local/apache2/htdocs/index.html
+Hello it's me
 ```
 
 </p>
@@ -99,9 +105,11 @@ Hello, World!
 > Note: Some small distributions of Kubernetes (such as [microk8s](https://microk8s.io/docs/registry-built-in)) have a built-in registry you can use for this exercise. If this is not your case, you'll have to setup it on your own.
 
 ```bash
-:~$ podman tag localhost/simpleapp $registry_ip:5000/simpleapp
+sudo podman tag localhost/mysimpleapp $registry_ip:5000/mysimpleapp
+```
 
-:~$ podman push $registry_ip:5000/simpleapp
+```bash
+sudo podman push $registry_ip:5000/mysimpleapp
 ```
 
 </p>
@@ -112,6 +120,12 @@ Verify that the registry contains the pushed image and that you can pull it
 <details><summary>show</summary>
 <p>
 
+```bash
+curl $registry_ip:5000/mysimpleapp
+sudo podman rmi $registry_ip:5000/mysimpleapp
+sudo podman pull $registry_ip:5000/mysimpleapp
+```
+
 </p>
 </details>
 
@@ -119,6 +133,24 @@ Verify that the registry contains the pushed image and that you can pull it
 
 <details><summary>show</summary>
 <p>
+
+```bash
+candidate@ckad9043:~/myimage$ sudo podman container create localhost/mysimpleapp
+692488a0489567e8c961e1c8c7c9e053b274a2df3cf371afb3361ff61f1b3b72
+```
+
+```bash
+candidate@ckad9043:~/myimage$ sudo podman container list
+CONTAINER ID  IMAGE                         COMMAND              CREATED        STATUS            PORTS                 NAMES
+748e796cae1d  localhost/mysimpleapp:latest  httpd-foreground     11 minutes ago Up 11 minutes ago 0.0.0.0:8080->80/tcp  sleepy_tesla
+```
+
+```bash
+candidate@ckad9043:~/myimage$ sudo podman container list -a
+CONTAINER ID  IMAGE                         COMMAND              CREATED        STATUS            PORTS                 NAMES
+748e796cae1d  localhost/mysimpleapp:latest  httpd-foreground     11 minutes ago Up 11 minutes ago 0.0.0.0:8080->80/tcp  sleepy_tesla
+692488a04895  localhost/mysimpleapp:latest  httpd-foreground     9 seconds ago  Created                                elastic_bhaskara
+```
 
 </p>
 </details>
@@ -128,6 +160,24 @@ Verify that the registry contains the pushed image and that you can pull it
 <details><summary>show</summary>
 <p>
 
+```bash
+candidate@ckad9043:~/myimage$ sudo podman export --output="output.tar" elastic_bhaskara
+```
+
+```bash
+candidate@ckad9043:~/myimage$ ls
+Dockerfile  output.tar
+```
+
+```bash
+candidate@ckad9043:~/myimage$ ls -al
+total 146732
+drwxrwxr-x 2 candidate candidate      4096 Jan 10 15:36 .
+drwxr-x--- 8 candidate candidate      4096 Jan 10 15:12 ..
+-rw-rw-r-- 1 candidate candidate        93 Jan 10 15:12 Dockerfile
+-rw-r--r-- 1 root      root      150236160 Jan 10 15:36 output.tar
+```
+
 </p>
 </details>
 
@@ -135,6 +185,10 @@ Verify that the registry contains the pushed image and that you can pull it
 
 <details><summary>show</summary>
 <p>
+
+```bash
+sudo k run pod --image=$registry_ip:5000/mysimpleapp --port=80 --restart=Never
+```
 
 </p>
 </details>
@@ -146,6 +200,21 @@ Verify that the registry contains the pushed image and that you can pull it
 
 > Note: The two most used container registry servers with a free plan are [DockerHub](https://hub.docker.com/) and [Quay.io](https://quay.io/).
 
+```bash
+sudo podman login --username $YOUR_UNAME --password $YOUR_PWD docker.io
+```
+
+```bash
+:~$ cat ${XDG_RUNTIME_DIR}/containers/auth.json
+{
+        "auths": {
+                "docker.io": {
+                        "auth": "Z2l1bGl0JLSGtvbkxCcX1xb617251xh0x3zaUd4QW45Q3JuV3RDOTc="
+                }
+        }
+}
+```
+
 </p>
 </details>
 
@@ -153,6 +222,10 @@ Verify that the registry contains the pushed image and that you can pull it
 
 <details><summary>show</summary>
 <p>
+
+```bash
+kubectl create secreate docker_registry mysecret --docker-username=$YOUR_UNAME --docker-password=$YOUR_PWD --docker-server="https://index.docker.io/v1/"
+```
 
 </p>
 </details>
@@ -162,6 +235,19 @@ Verify that the registry contains the pushed image and that you can pull it
 <details><summary>show</summary>
 <p>
 
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: private-reg
+spec:
+  containers:
+    - name: private-reg-container
+      image: $YOUR_PRIVATE_IMAGE
+  imagePullSecrets:
+    - name: mysecret
+```
+
 </p>
 </details>
 
@@ -169,6 +255,11 @@ Verify that the registry contains the pushed image and that you can pull it
 
 <details><summary>show</summary>
 <p>
+
+```bash
+sudo podman rmi --all --force
+sudo podman rm --all --force
+```
 
 </p>
 </details>
